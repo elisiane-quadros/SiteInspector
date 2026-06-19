@@ -1,0 +1,22 @@
+name: Comprimir Imagens
+
+on:
+  push:
+    paths:
+      - 'assets/**.png'
+      - 'assets/**.jpg'
+      - 'assets/**.jpeg'
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repositório
+        uses: actions/checkout@v3
+
+      - name: Comprimir Imagens
+        uses: calibreapp/image-actions@main
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          jpegQuality: 80
+          pngQuality: 80
