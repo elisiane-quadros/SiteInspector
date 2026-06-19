@@ -6,7 +6,8 @@ import api from "./services/api";
 
 import type { ContrastItem } from "./interfaces/ResultContrast";
 import { PDFDownloadLink } from "@react-pdf/renderer";
-import { ReportPDF } from "./components/ReportPDF";
+import { TechnicalReportPDF } from "./components/TechnicalReportPDF";
+import { ExecutiveReportPDF } from "./components/ExecutiveReportPDF";
 
 function App() {
   const [result, setResult] = useState<AccessibilityResults | null>(null);
@@ -16,6 +17,7 @@ function App() {
   const [errorContrast, setErrorContrast] = useState<string>("");
   const [contrastLoading, setContrastLoading] = useState(false);
   const [currentUrl, setCurrentUrl] = useState("");
+ // const [pdfError, setPdfError] = useState<string>("");
 
   const isValidUrl = (url: string): boolean => {
     try {
@@ -26,6 +28,14 @@ function App() {
     }
   };
 
+  const extractDomainName = (url: string): string => {
+  try {
+    return new URL(url).hostname.replace("www.", "").split(".")[0];
+  } catch {
+    return "site";
+  }
+};
+
   const requestCheck = async (url: string) => {
     if (!isValidUrl(url)) {
       setError(
@@ -34,40 +44,41 @@ function App() {
       return;
     }
     setLoading(true);
+    setContrastLoading(true);
     try {
       const { data } = await api.post("/check", { url });
-      setResult(data.results);
-    } catch {
+
+      // 💡 GARANTIA DE FORMATO: Se o backend devolver a estrutura dentro de data.results ou direto em data
+      const finalResults = {
+        ...data.results,
+        url: data.url || url,
+        business_segment: data.business_segment,
+        executive_analysis: data.executive_analysis,
+        priority_roadmap: data.priority_roadmap
+      };
+      setResult(finalResults);
+
+      // O contraste já vem calculado no /check — evita uma 2ª chamada (e um 2º Playwright).
+      setContrastResult(data.contrast_issues ?? data.results?.contrast ?? []);
+    } catch (err) {
+      console.error("Erro na requisição principal:", err);
       setError("Erro ao processar a verificação principal.");
       return;
     } finally {
       setLoading(false);
-    }
-  };
-
-  const requestContrast = async (url: string) => {
-    setContrastLoading(true);
-    try {
-      const response = await api.post<{ contrast_issues: any[] }>("/contrast", {
-        url,
-      });
-      setContrastResult(response.data.contrast_issues);
-    } catch {
-      setErrorContrast("Erro ao processar a verificação de contraste.");
-      return;
-    } finally {
       setContrastLoading(false);
     }
   };
 
   const handleCheck = (url: string) => {
+    setCurrentUrl(url);
     setResult(null);
     setContrastResult([]);
     setError("");
     setErrorContrast("");
     requestCheck(url);
-    requestContrast(url);
   };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col gap-4">
       <header className="bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400 shadow-lg">
@@ -177,6 +188,13 @@ function App() {
                     />
 
                     <ResultCard
+                      title="Navegação por teclado / foco"
+                      description="Verifica controles e elementos interativos que não podem ser alcançados ou focados durante a navegação por teclado."
+                      sucessDescription="A navegação por teclado está adequada."
+                      items={result.focus?.length ? result.focus : []}
+                    />
+
+                    <ResultCard
                       title="Landmarks semânticos ausentes"
                       description="É necessário usar as tags semânticas: <main>, <nav>, <header>, <footer>, para organizar a estrutura da página."
                       sucessDescription="Todos os landmarks estão presentes e corretos."
@@ -218,29 +236,81 @@ function App() {
                   items={contrastResult}
                 />
               )}
-              {!loading && !contrastLoading && (
-                <div className="flex items-start justify-center md:col-span-1">
-                  <PDFDownloadLink
-                    document={
-                      <ReportPDF
-                        result={result}
-                        contrastResult={contrastResult}
-                        url={currentUrl}
-                      />
-                    }
-                    fileName="relatorio-acessibilidade.pdf"
-                    className="bg-blue-600 text-white px-4 py-2 rounded w-full h-full text-center items-center flex justify-center hover:bg-blue-700 transition-colors"
-                  >
-                    {({ loading }) =>
-                      loading ? (
-                        "Gerando PDF..."
-                      ) : (
-                        <span>Baixar Relatório em PDF</span>
-                      )
-                    }
-                  </PDFDownloadLink>
-                </div>
-              )}
+              {!loading && !contrastLoading && result && (
+                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 md:col-span-2 w-full mt-4">
+                  <h3 className="text-lg font-bold text-gray-800 mb-1">Exportar Relatórios Oficiais</h3>
+                  <p className="text-sm text-gray-500 mb-4">Escolha o modelo de documento ideal para a sua audiência:</p>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                    
+                    {/*1. BOTÃO DO RELATÓRIO EXECUTIVO (Para Clientes / Gestores) */}
+                    <div className="flex flex-col w-full gap-2">
+                      <PDFDownloadLink
+                        document={
+                          <ExecutiveReportPDF
+                            result={result}
+                            url={currentUrl || result.url || "URL não informada"}
+                            businessSegment={result?.business_segment || "Geral"}
+                            executiveAnalysis={result?.executive_analysis || "Análise estratégica em processamento..."}
+                          />
+                        }
+                        fileName={`relatorio-executivo-${extractDomainName(currentUrl)}.pdf`}
+                        className="w-full"
+                      >
+                        {({ loading: pdfLoading, error: pdfError }) => (
+                          <button
+                            type="button"
+                            disabled={pdfLoading || !!pdfError}
+                            className={`px-4 py-3 rounded-lg font-semibold w-full text-center flex flex-col items-center justify-center gap-1 transition-all shadow-sm ${
+                              pdfError 
+                                ? "bg-red-100 text-red-700 cursor-not-allowed border border-red-200" 
+                                : "bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer"
+                            }`}
+                          >
+                            <span className="text-base font-bold">Relatório Executivo</span>
+                            <span className="text-xs font-normal opacity-90">
+                              {pdfError ? "Erro na estrutura do documento" : pdfLoading ? "Construindo PDF..." : "Baixar para Gestão / Compliance"}
+                            </span>
+                          </button>
+                        )}
+        </PDFDownloadLink>
+      </div>
+
+      {/*2. BOTÃO DO CHECKLIST TÉCNICO (Para Desenvolvedores / TI) */}
+      <div className="flex flex-col w-full gap-2">
+        <PDFDownloadLink
+          document={
+            <TechnicalReportPDF
+              result={result}
+              contrastResult={contrastResult || []}
+              url={currentUrl || "URL não informada"}
+            />
+          }
+          fileName={`checklist-tecnico-${extractDomainName(currentUrl)}.pdf`}
+          className="w-full"
+        >
+          {({ loading: pdfLoading, error: pdfError }) => (
+            <button
+              type="button"
+              disabled={pdfLoading || !!pdfError}
+              className={`px-4 py-3 rounded-lg font-semibold w-full text-center flex flex-col items-center justify-center gap-1 transition-all shadow-sm ${
+                pdfError 
+                  ? "bg-red-100 text-red-700 cursor-not-allowed border border-red-200" 
+                  : "bg-slate-800 text-white hover:bg-slate-900 cursor-pointer"
+              }`}
+            >
+              <span className="text-base font-bold">Checklist Técnico</span>
+              <span className="text-xs font-normal opacity-90">
+                {pdfError ? "Erro na estrutura do documento" : pdfLoading ? "Construindo PDF..." : "Baixar para Engenharia / TI"}
+              </span>
+            </button>
+          )}
+        </PDFDownloadLink>
+      </div>
+
+    </div>
+  </div>
+)}
             </div>
           </div>
         ) : null}

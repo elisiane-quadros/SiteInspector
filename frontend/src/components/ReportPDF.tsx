@@ -5,77 +5,99 @@ import type { ContrastItem } from "../interfaces/ResultContrast";
 
 const styles = StyleSheet.create({
   page: {
-    padding: 32,
-    fontSize: 12,
+    padding: 40,
+    fontSize: 11,
     fontFamily: "Helvetica",
-    color: "#000",
+    color: "#1F2937", // Cinza escuro corporativo
   },
   header: {
-    backgroundColor: "#2563EB",
-    padding: 8,
+    backgroundColor: "#1E3A8A", // Azul marinho sólido
+    padding: 16,
     borderRadius: 4,
-    marginBottom: 20,
+    marginBottom: 24,
   },
   headerTitle: {
-    color: "#fff",
+    color: "#FFFFFF",
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
   },
+  sectionContainer: {
+    marginBottom: 20,
+  },
+  sectionTitleHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+    paddingBottom: 4,
+    marginTop: 16,
+    marginBottom: 6,
+  },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "bold",
     color: "#1E3A8A",
-    marginTop: 20,
-    marginBottom: 4,
   },
-  label: {
-    fontWeight: 700,
-    fontSize: 12,
+  statusBadgeError: {
+    color: "#DC2626",
+    fontSize: 11,
+    fontWeight: "bold",
   },
-  paragraph: {
-    borderRadius: 4,
-    marginBottom: 2,
-    padding: 4,
-    fontSize: 12,
-  },
-  itemContainerHeightLight: {
-    backgroundColor: "#EFF6FF",
-    borderRadius: 4,
-    marginBottom: 6,
-    padding: 4,
-  },
-  itemContainer: {
-    borderRadius: 4,
-    marginBottom: 6,
-    padding: 4,
-  },
-  successMessage: {
-    color: "#22c55e",
-    marginBottom: 8,
-    fontSize: 12,
-  },
-  item: {
-    marginBottom: 6,
-    lineHeight: 1.4,
+  statusBadgeSuccess: {
+    color: "#16A34A",
+    fontSize: 11,
+    fontWeight: "bold",
   },
   description: {
-    color: "#6B7280",
+    color: "#4B5563",
+    fontSize: 10,
     marginBottom: 8,
+    fontStyle: "italic",
   },
-  totalErrorMessage: {
-    color: "#DC2626",
-    marginBottom: 8,
-    fontSize: 12,
+  itemContainerHighlight: {
+    backgroundColor: "#F9FAFB",
+    borderRadius: 4,
+    marginBottom: 4,
+    padding: 8,
+    borderLeftWidth: 2,
+    borderLeftColor: "#3B82F6",
+  },
+  itemContainer: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 4,
+    marginBottom: 4,
+    padding: 8,
+    borderLeftWidth: 2,
+    borderLeftColor: "#E5E7EB",
+  },
+  paragraph: {
+    marginBottom: 3,
+    lineHeight: 1.4,
+  },
+  label: {
+    fontWeight: "bold",
+    color: "#374151",
+  },
+  aiText: {
+    color: "#6D28D9",
+    marginTop: 4,
+    paddingTop: 4,
+    borderTopWidth: 0.5,
+    borderTopColor: "#E9D5FF",
   },
   footer: {
     position: "absolute",
-    bottom: 20,
-    left: 32,
-    right: 32,
+    bottom: 24,
+    left: 40,
+    right: 40,
     textAlign: "center",
-    fontSize: 10,
-    color: "#6B7280",
+    fontSize: 9,
+    color: "#9CA3AF",
+    borderTopWidth: 0.5,
+    borderTopColor: "#E5E7EB",
+    paddingTop: 8,
   },
 });
 
@@ -85,314 +107,222 @@ interface ReportPDFProps {
   url: string;
 }
 
-export const ReportPDF: React.FC<ReportPDFProps> = ({
-  result,
-  contrastResult,
-  url,
-}) => {
+interface SectionHeaderProps {
+  title: string;
+  description: string;
+  issueCount: number;
+  successMessage?: string;
+}
+
+const ReportSectionHeader: React.FC<SectionHeaderProps> = ({ title, description, issueCount, successMessage = "Nenhum problema encontrado" }) => (
+  <View style={styles.sectionContainer}>
+    <View style={styles.sectionTitleHeader}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {issueCount === 0 ? (
+        <Text style={styles.statusBadgeSuccess}>✓ {successMessage}</Text>
+      ) : (
+        <Text style={styles.statusBadgeError}>
+          {issueCount} {issueCount === 1 ? "problema detectado" : "problemas detectados"}
+        </Text>
+      )}
+    </View>
+    <Text style={styles.description}>{description}</Text>
+  </View>
+);
+
+export const ReportPDF: React.FC<ReportPDFProps> = ({ result, contrastResult = [], url }) => {
   if (!result) {
     return (
       <Document>
         <Page style={styles.page}>
-          <Text style={styles.paragraph}>
-            Nenhum dado disponível para gerar relatório.
-          </Text>
-          <Text style={styles.footer}>Relatório gerado por A11y_Inspector</Text>
+          <Text style={styles.paragraph}>Nenhum dado disponível para gerar o relatório corporativo.</Text>
+          <Text style={styles.footer}>Relatório gerado automaticamente por A11y_Inspector</Text>
         </Page>
       </Document>
     );
   }
+
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
+      <Page size="A4" style={styles.page} wrap>
+        {/* Cabeçalho Principal */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>
-            A11y_Inspector - Relatório de Acessibilidade
+          <Text style={styles.headerTitle}>Relatório Analítico de Acessibilidade Digital</Text>
+        </View>
+
+        {/* Metadados da Auditoria */}
+        <View style={{ marginBottom: 16, fontSize: 10, color: "#4B5563" }}>
+          <Text style={styles.paragraph}><Text style={styles.label}>URL Analisada: </Text>{url || "Não informada"}</Text>
+          <Text style={styles.paragraph}><Text style={styles.label}>Data da Inspeção: </Text>{new Date().toLocaleString("pt-BR")}</Text>
+        </View>
+
+        {/* Resumo Executivo */}
+        <View style={{ ...styles.sectionContainer, backgroundColor: "#F3F4F6", padding: 12, borderRadius: 4 }}>
+          <Text style={styles.sectionTitle}>Resumo Executivo</Text>
+          <Text style={styles.paragraph}>
+            <Text style={styles.label}>Total de Problemas Encontrados: </Text>
+            {(result.images?.length || 0) + (result.forms?.length || 0) + (result.headings?.length || 0) + (result.links?.length || 0) + (result.buttons?.length || 0) + (result.landmarks?.length || 0) + (contrastResult?.length || 0)}
+          </Text>
+          <Text style={styles.paragraph}>
+            <Text style={styles.label}>Imagens sem Alt: </Text>{result.images?.length || 0}
+          </Text>
+          <Text style={styles.paragraph}>
+            <Text style={styles.label}>Campos sem Rótulo: </Text>{result.forms?.length || 0}
+          </Text>
+          <Text style={styles.paragraph}>
+            <Text style={styles.label}>Problemas de Hierarquia: </Text>{result.headings?.length || 0}
+          </Text>
+          <Text style={styles.paragraph}>
+            <Text style={styles.label}>Links com Texto Vago: </Text>{result.links?.length || 0}
+          </Text>
+          <Text style={styles.paragraph}>
+            <Text style={styles.label}>Botões sem Rótulo: </Text>{result.buttons?.length || 0}
+          </Text>
+          <Text style={styles.paragraph}>
+            <Text style={styles.label}>Landmarks Ausentes: </Text>{result.landmarks?.length || 0}
+          </Text>
+          <Text style={styles.paragraph}>
+            <Text style={styles.label}>Problemas de Contraste: </Text>{contrastResult?.length || 0}
           </Text>
         </View>
 
-        <Text>URL analisada: {url || "Não informada"}</Text>
-        <Text>Data: {new Date().toLocaleString("pt-BR")}</Text>
+        {result.images && result.images.length > 0 && (
+          <>
+            <ReportSectionHeader 
+              title="Imagens sem descrição (Alt)" 
+              description="Imagens sem o atributo descritivo impedem a compreensão do conteúdo por usuários de leitores de tela e degradam o SEO da página."
+              issueCount={result.images?.length || 0}
+              successMessage="Todas as imagens possuem texto alternativo."
+            />
+            {result.images?.map((img, index) => (
+              <View key={index} style={index % 2 === 0 ? styles.itemContainerHighlight : styles.itemContainer}>
+                <Text style={styles.paragraph}><Text style={styles.label}>HTML do Elemento: </Text>{img.html}</Text>
+                <Text style={styles.paragraph}><Text style={styles.label}>URL Origem: </Text>{img.image_url || "Não disponível"}</Text>
+                {img.ai_description_suggestion && (
+                  <Text style={[styles.paragraph, styles.aiText]}>
+                    <Text style={styles.label}>Insight da IA (Sugestão de Alt): </Text>"{img.ai_description_suggestion}"
+                  </Text>
+                )}
+              </View>
+            ))}
+          </>
+        )}
 
-        <Text style={styles.sectionTitle}>
-          Imagens sem descrição (alt) -{" "}
-          {result && result.images.length === 0 ? (
-            <Text style={styles.successMessage}>
-              Todas as imagens possuem texto alternativo.
-            </Text>
-          ) : (
-            <Text style={styles.totalErrorMessage}>
-              {result.images.length}{" "}
-              {result.images.length === 1
-                ? "Problema encontrado"
-                : "Problemas encontrados"}
-            </Text>
-          )}
-        </Text>
-        <Text style={styles.description}>
-          Todas as imagens devem ter texto alternativo para leitores de tela.
-        </Text>
-        {result && result.images.length
-          ? result.images.map((img, index: number) => {
-              return (
-                <View
-                  key={img.src}
-                  style={
-                    index % 2 === 0
-                      ? styles.itemContainerHeightLight
-                      : styles.itemContainer
-                  }
-                >
-                  <Text style={styles.paragraph}>
-                    <Text style={styles.label}>html: </Text>
-                    {img.html}
-                  </Text>
-                  <Text style={styles.paragraph}>
-                    <Text style={styles.label}>src: </Text>
-                    {img.src}
-                  </Text>
-                </View>
-              );
-            })
-          : null}
-        <Text style={styles.sectionTitle}>
-          Campos de formulário sem rótulo -{" "}
-          {result && result.forms.length === 0 ? (
-            <Text style={styles.successMessage}>
-              Nenhum problema encontrado
-            </Text>
-          ) : (
-            <Text style={styles.totalErrorMessage}>
-              {result.forms.length}{" "}
-              {result.forms.length === 1 ? "Problema" : "Problemas"}{" "}
-              {result.forms.length === 1 ? "encontrado." : "encontrados."}
-            </Text>
-          )}
-        </Text>
-        <Text style={styles.description}>
-          {"Cada campo deve ter um <label>(rótulo) associado."}
-        </Text>
-        {result && result.forms.length
-          ? result.forms.map((form, index: number) => {
-              return (
-                <View
-                  key={form.html}
-                  style={
-                    index % 2 === 0
-                      ? styles.itemContainerHeightLight
-                      : styles.itemContainer
-                  }
-                >
-                  <Text style={styles.paragraph}>
-                    <Text style={styles.label}>html: </Text>
-                    {form.html}
-                  </Text>
-                  <Text style={styles.paragraph}>
-                    <Text style={styles.label}>mensagem: </Text>
-                    {form.message}
-                  </Text>
-                </View>
-              );
-            })
-          : null}
-        <Text style={styles.sectionTitle}>
-          Problemas na hierarquia de títulos -{" "}
-          {result && result.headings.length === 0 ? (
-            <Text style={styles.successMessage}>
-              Nenhum problema encontrado
-            </Text>
-          ) : (
-            <Text style={styles.totalErrorMessage}>
-              {result.headings.length}{" "}
-              {result.headings.length === 1 ? "Problema" : "Problemas"}{" "}
-              {result.headings.length === 1 ? "encontrado." : "encontrados."}
-            </Text>
-          )}
-        </Text>
-        <Text style={styles.description}>
-          {"Use apenas um <h1>(título) e evite pular níveis."}
-        </Text>
+        {/* 2. SEÇÃO DE FORMULÁRIOS */}
+        {result.forms && result.forms.length > 0 && (
+          <>
+            <ReportSectionHeader 
+              title="Campos de Formulário sem Rótulo" 
+              description="Inputs e controles de formulário precisam de elementos <label> explicitamente associados para garantir acessibilidade cognitiva e técnica."
+              issueCount={result.forms?.length || 0}
+            />
+            {result.forms?.map((form, index) => (
+              <View key={index} style={index % 2 === 0 ? styles.itemContainerHighlight : styles.itemContainer}>
+                <Text style={styles.paragraph}><Text style={styles.label}>HTML do Elemento: </Text>{form.html}</Text>
+                <Text style={styles.paragraph}><Text style={styles.label}>Mapeamento WCAG: </Text>{form.message}</Text>
+              </View>
+            ))}
+          </>
+        )}
 
-        {result && result.headings.length
-          ? result.headings.map((head, index: number) => {
-              return (
-                <View
-                  key={index}
-                  style={
-                    index % 2 === 0
-                      ? styles.itemContainerHeightLight
-                      : styles.itemContainer
-                  }
-                >
-                  <Text style={styles.paragraph}>{head}</Text>
-                </View>
-              );
-            })
-          : null}
-        <Text style={styles.sectionTitle}>
-          Links com texto vago -{" "}
-          {result && result.links.length === 0 ? (
-            <Text style={styles.successMessage}>
-              Nenhum problema encontrado
-            </Text>
-          ) : (
-            <Text style={styles.totalErrorMessage}>
-              {result.links.length}{" "}
-              {result.links.length === 1 ? "Problema" : "Problemas"}{" "}
-              {result.links.length === 1 ? "encontrado." : "encontrados."}
-            </Text>
-          )}
-        </Text>
-        <Text style={styles.description}>
-          Evite usar textos genéricos como “clique aqui” em links. Prefira
-          descrições que indiquem o destino ou a ação.
-        </Text>
+        {/* 3. SEÇÃO DE HIERARQUIA DE TÍTULOS */}
+        {result.headings && result.headings.length > 0 && (
+          <>
+            <ReportSectionHeader 
+              title="Inconformidades na Hierarquia de Títulos (Headings)" 
+              description="A árvore de cabeçalhos (H1 a H6) define a estrutura semântica da página. Quebras na sequência prejudicam a navegação estruturada."
+              issueCount={result.headings?.length || 0}
+            />
+            {result.headings?.map((head, index) => (
+              <View key={index} style={index % 2 === 0 ? styles.itemContainerHighlight : styles.itemContainer}>
+                <Text style={styles.paragraph}><Text style={styles.label}>Elemento: </Text>{typeof head === 'string' ? head : (head.element || head.message || 'Sem informação')}</Text>
+                {typeof head !== 'string' && head.message && (
+                  <Text style={styles.paragraph}><Text style={styles.label}>Detalhes: </Text>{head.message}</Text>
+                )}
+              </View>
+            ))}
+          </>
+        )}
 
-        {result && result.links.length
-          ? result.links.map((link, index: number) => {
-              return (
-                <View
-                  key={index}
-                  style={
-                    index % 2 === 0
-                      ? styles.itemContainerHeightLight
-                      : styles.itemContainer
-                  }
-                >
-                  <Text style={styles.paragraph}>{link}</Text>
-                </View>
-              );
-            })
-          : null}
-        <Text style={styles.sectionTitle}>
-          Botões sem rótulo acessível -{" "}
-          {result && result.buttons.length === 0 ? (
-            <Text style={styles.successMessage}>
-              Nenhum problema encontrado
-            </Text>
-          ) : (
-            <Text style={styles.totalErrorMessage}>
-              {result.buttons.length}{" "}
-              {result.buttons.length === 1 ? "Problema" : "Problemas"}{" "}
-              {result.buttons.length === 1 ? "encontrado." : "encontrados."}
-            </Text>
-          )}
-        </Text>
-        <Text style={styles.description}>
-          Todos os botões devem ter texto visível ou atributos como aria-label.
-        </Text>
+        {/* 4. SEÇÃO DE LINKS VAGOS */}
+        {result.links && result.links.length > 0 && (
+          <>
+            <ReportSectionHeader 
+              title="Links com Texto Ambíguo" 
+              description="Textos como 'clique aqui' ou 'saiba mais' soltos não fornecem contexto sobre o destino do link em leitores de tela."
+              issueCount={result.links?.length || 0}
+            />
+            {result.links?.map((link, index) => (
+              <View key={index} style={index % 2 === 0 ? styles.itemContainerHighlight : styles.itemContainer}>
+                <Text style={styles.paragraph}><Text style={styles.label}>Elemento: </Text>{typeof link === 'string' ? link : (link.element || link.message || 'Sem informação')}</Text>
+                {typeof link !== 'string' && link.message && (
+                  <Text style={styles.paragraph}><Text style={styles.label}>Detalhes: </Text>{link.message}</Text>
+                )}
+              </View>
+            ))}
+          </>
+        )}
 
-        {result && result.buttons.length
-          ? result.buttons.map((button, index: number) => {
-              return (
-                <View
-                  key={button.id}
-                  style={
-                    index % 2 === 0
-                      ? styles.itemContainerHeightLight
-                      : styles.itemContainer
-                  }
-                >
-                  <Text style={styles.paragraph}>
-                    <Text style={styles.label}>id: </Text>
-                    {button.id}
-                  </Text>
-                  <Text style={styles.paragraph}>
-                    <Text style={styles.label}>html: </Text>
-                    {button.html}
-                  </Text>
-                  <Text style={styles.paragraph}>
-                    <Text style={styles.label}>mensagem: </Text>
-                    {button.message}
-                  </Text>
-                </View>
-              );
-            })
-          : null}
-        <Text style={styles.sectionTitle}>
-          Landmarks semânticos ausentes -{" "}
-          {result && result.landmarks.length === 0 ? (
-            <Text style={styles.successMessage}>
-              Nenhum problema encontrado
-            </Text>
-          ) : (
-            <Text style={styles.totalErrorMessage}>
-              {result.landmarks.length}{" "}
-              {result.landmarks.length === 1 ? "Problema" : "Problemas"}{" "}
-              {result.landmarks.length === 1 ? "encontrado." : "encontrados."}
-            </Text>
-          )}
-        </Text>
-        <Text style={styles.description}>
-          {
-            "É necessário usar as tags semânticas: <main>, <nav>, <header>, <footer>, para organizar a estrutura da página."
-          }
-        </Text>
+        {/* 5. SEÇÃO DE BOTÕES SEM RÓTULO */}
+        {result.buttons && result.buttons.length > 0 && (
+          <>
+            <ReportSectionHeader 
+              title="Botões sem Acessibilidade Textual" 
+              description="Todos os botões devem possuir texto visível descritivo ou uma tag 'aria-label' equivalente mapeada."
+              issueCount={result.buttons?.length || 0}
+            />
+            {result.buttons?.map((button, index) => (
+              <View key={index} wrap={false} style={index % 2 === 0 ? styles.itemContainerHighlight : styles.itemContainer}>
+                <Text style={styles.paragraph}><Text style={styles.label}>ID do Elemento: </Text>{button.id || "Não identificado"}</Text>
+                <Text style={styles.paragraph}><Text style={styles.label}>HTML do Elemento: </Text>{button.html}</Text>
+                <Text style={styles.paragraph}><Text style={styles.label}>Mapeamento WCAG: </Text>{button.message}</Text>
+              </View>
+            ))}
+          </>
+        )}
 
-        {result && result.landmarks.length
-          ? result.landmarks.map((landmark, index: number) => {
-              return (
-                <View
-                  key={index}
-                  style={
-                    index % 2 === 0
-                      ? styles.itemContainerHeightLight
-                      : styles.itemContainer
-                  }
-                >
-                  <Text style={styles.paragraph}>{landmark}</Text>
-                </View>
-              );
-            })
-          : null}
-        <Text style={styles.sectionTitle}>
-          Problemas de Contraste -{" "}
-          {contrastResult.length === 0 ? (
-            <Text style={styles.successMessage}>
-              Nenhum problema encontrado
-            </Text>
-          ) : (
-            <Text style={styles.totalErrorMessage}>
-              {contrastResult.length}{" "}
-              {contrastResult.length === 1 ? "Problema" : "Problemas"}{" "}
-              {contrastResult.length === 1 ? "encontrado." : "encontrados."}
-            </Text>
-          )}
-        </Text>
-        <Text style={styles.description}>
-          Todos os textos devem ter contraste suficiente com o fundo para
-          garantir legibilidade.
-        </Text>
+        {/* 6. SEÇÃO DE LANDMARKS */}
+        {result.landmarks && result.landmarks.length > 0 && (
+          <>
+            <ReportSectionHeader 
+              title="Landmarks Semânticos Ausentes" 
+              description="Uso obrigatório de tags estruturais principais como <main>, <nav>, <header> e <footer> para orientar o motor de acessibilidade."
+              issueCount={result.landmarks?.length || 0}
+            />
+            {result.landmarks?.map((landmark, index) => (
+              <View key={index} style={index % 2 === 0 ? styles.itemContainerHighlight : styles.itemContainer}>
+                <Text style={styles.paragraph}><Text style={styles.label}>Estrutura: </Text>{typeof landmark === 'string' ? landmark : (landmark.element || landmark.message || 'Sem informação')}</Text>
+                {typeof landmark !== 'string' && landmark.message && (
+                  <Text style={styles.paragraph}><Text style={styles.label}>Detalhes: </Text>{landmark.message}</Text>
+                )}
+              </View>
+            ))}
+          </>
+        )}
 
-        {contrastResult.length
-          ? contrastResult.map((contrast, index: number) => {
-              return (
-                <View
-                  key={index}
-                  style={
-                    index % 2 === 0
-                      ? styles.itemContainerHeightLight
-                      : styles.itemContainer
-                  }
-                >
-                  <Text style={styles.paragraph}>
-                    <Text style={styles.label}>text: </Text>
-                    {contrast.text ? contrast.text : "N/A"}
-                  </Text>
-                  <Text style={styles.paragraph}>
-                    <Text style={styles.label}>color: </Text>
-                    {contrast.color ? contrast.color : "N/A"}
-                  </Text>
-                  <Text style={styles.paragraph}>
-                    <Text style={styles.label}>background: </Text>
-                    {contrast.background ? contrast.background : "N/A"}
-                  </Text>
-                </View>
-              );
-            })
-          : null}
+        {/* 7. SEÇÃO DE CONTRASTE */}
+        {contrastResult && contrastResult.length > 0 && (
+          <>
+            <ReportSectionHeader 
+              title="Falhas Críticas de Contraste de Cores" 
+              description="Verificação matemática de taxas de contraste entre a cor do texto e a cor do fundo para garantir a legibilidade universal."
+              issueCount={contrastResult?.length || 0}
+            />
+            {contrastResult?.map((contrast, index) => (
+              <View key={index} style={index % 2 === 0 ? styles.itemContainerHighlight : styles.itemContainer}>
+                <Text style={styles.paragraph}><Text style={styles.label}>Texto Capturado: </Text>"{contrast.text || "N/A"}"</Text>
+                <Text style={styles.paragraph}>
+                  <Text style={styles.label}>Especificação Técnica: </Text>
+                  Cor do Texto: {contrast.color || "N/A"} | Cor do Fundo: {contrast.background || "N/A"}
+                </Text>
+              </View>
+            ))}
+          </>
+        )}
+
+        {/* Rodapé institucional */}
         <Text style={styles.footer}>
-          © 2025 por Elisiane Quadros — Desenvolvido com A11y_Inspector
+          Documento Confidencial — Gerado por Elisiane Quadros via A11y_Inspector. Todos os direitos reservados © {new Date().getFullYear()}.
         </Text>
       </Page>
     </Document>
