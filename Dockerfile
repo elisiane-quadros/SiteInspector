@@ -5,7 +5,7 @@ FROM mcr.microsoft.com/playwright/python:v1.60.0-jammy
 WORKDIR /app
 
 # Instala dependências Python primeiro (cache de layer)
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Instala apenas o Chromium (já vem na imagem base, garante a versão correta)

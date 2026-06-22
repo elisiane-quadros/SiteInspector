@@ -6,6 +6,11 @@ on:
       - 'assets/**.png'
       - 'assets/**.jpg'
       - 'assets/**.jpeg'
+  pull_request:
+    paths:
+      - 'assets/**.png'
+      - 'assets/**.jpg'
+      - 'assets/**.jpeg'
 
 jobs:
   optimize:
@@ -17,6 +22,6 @@ jobs:
       - name: Comprimir Imagens
         uses: calibreapp/image-actions@main
         with:
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           jpegQuality: 80
           pngQuality: 80

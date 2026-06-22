@@ -1,11 +1,7 @@
 import os
 import asyncio
-import requests
-from io import BytesIO
-from PIL import Image
-from groq import Groq
-from bs4 import BeautifulSoup
 import re
+from groq import Groq
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
@@ -50,19 +46,10 @@ async def generate_image_description(image_url: str) -> str:
         return "Configuração de IA ausente (Chave API não encontrada no ambiente)."
 
     try:
-        # Usamos o executor do asyncio para que a requisição HTTP (síncrona) 
-        # do requests não trave o loop principal do FastAPI
+        # O SDK do Groq é síncrono; rodamos a chamada num executor para não
+        # travar o loop de eventos do FastAPI. O próprio Groq busca a imagem
+        # pela URL, então não baixamos os bytes aqui.
         loop = asyncio.get_event_loop()
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-        
-        response = await loop.run_in_executor(
-            None, 
-            lambda: requests.get(image_url, headers=headers, timeout=5, verify=False)
-        )
-        
-        if response.status_code != 200:
-            return "Não foi possível carregar a imagem para a análise de IA."
-        
 
         image_prompt = (
             "Você é um especialista em acessibilidade digital e e-commerce. "
@@ -86,7 +73,6 @@ async def generate_image_description(image_url: str) -> str:
         response_ai = await loop.run_in_executor(
             None,
             lambda: client.chat.completions.create(
-                # Modelo multimodal atual da Groq (o antigo llama-3.2-11b-vision-preview foi descontinuado)
                 model="meta-llama/llama-4-scout-17b-16e-instruct",
                 messages=messages,
                 temperature=0.0,
@@ -102,28 +88,12 @@ async def generate_image_description(image_url: str) -> str:
         return "Sugestão de descrição indisponível no momento."
 
 
-def _extract_meta_description(html_content: str) -> str:
-    """Internal helper function to extract the meta description tag from HTML via Regex."""
-    if not html_content:
-        return "Descrição textual indisponível."
-        
-    pattern = r'<meta\s+name=["\']description["\']\s+content=["\'](.*?)["\']'
-    match = re.search(pattern, html_content, re.IGNORECASE)
-    
-    if not match:
-        inverted_pattern = r'<meta\s+content=["\'](.*?)["\']\s+name=["\']description["\']'
-        match = re.search(inverted_pattern, html_content, re.IGNORECASE)
-        
-    return match.group(1) if match else "Descrição não encontrada no HTML principal."
-
-
 def _detect_business_segment(url: str, meta_description: str) -> str:
     """
     Analyzes the URL and Meta Description for keywords to classify the target
     website as 'ecommerce', 'saas', or 'corporate' (default).
     """
     analysis_text = f"{url} {meta_description}".lower()
-    print(f"[SEGMENT DEBUG] Texto analisado: {analysis_text[:200]}") 
     # Busca por palavras exatas ou radicais comuns do ecossistema de vendas
     ecommerce_pattern = r"\b(compre?|lojas?|produtos?|ofertas?|descontos?|carrinho|checkout|vendas?|shop(ping)?|cart|store|roupas?|sapatos?|acessórios?|parcelado|moda|femininas?|masculinas?|infantis?)\b"
     
@@ -141,31 +111,9 @@ def _detect_business_segment(url: str, meta_description: str) -> str:
     return "corporate"
 
 
-def clean_html_for_llm(html_content: str) -> str:
-    """
-    Remove tags pesadas e irrelevantes para análise estratégica,
-    reduzindo drasticamente o consumo de tokens na API da Groq.
-    """
-    if not html_content:
-        return ""
-        
-    soup = BeautifulSoup(html_content, "html.parser")
-    
-    # Remove elementos que não alteram o entendimento de acessibilidade de alto nível
-    for element in soup(["script", "style", "svg", "iframe", "noscript", "link"]):
-        element.decompose()
-        
-    # Retorna o HTML limpo, removendo espaços e quebras de linha duplicadas
-    cleaned_text = soup.prettify()
-    return "\n".join([line.strip() for line in cleaned_text.splitlines() if line.strip()])
-
-
-async def generate_executive_report(url: str, html_content: str, summary_errors: dict, business_segment: str = "corporate", roadmap: list = None) -> str:
+async def generate_executive_report(url: str, context: str, summary_errors: dict, business_segment: str = "corporate", roadmap: list = None) -> str:
     if not client:
         return "Configuração da IA Groq ausente."
-
-    print(f"\n[AI DEBUG] Starting Contextualized IA Pipeline for: {url}")
-    print(f"[AI DEBUG] Business Segment Received: {business_segment.upper()}")
 
     roadmap = roadmap or []
 
@@ -204,7 +152,7 @@ async def generate_executive_report(url: str, html_content: str, summary_errors:
     user_prompt = f"""
     Dados Coletados da Auditoria:
     - URL do Site: {url}
-    - Contexto: "{html_content}"
+    - Contexto: "{context}"
     - Erros Técnicos Computados: {summary_errors}
     """
 

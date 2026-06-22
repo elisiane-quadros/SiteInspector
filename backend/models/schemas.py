@@ -40,15 +40,6 @@ class ContrastIssue(BaseModel):
 
 
 class ImageAccessibilityIssue(BaseIssue):
-    wcag: str
-    severity: str
-    element: str
-    message: str
-    suggestion: str
-    html: str
-    friendly_title: Optional[str] = None
-    friendly_message: Optional[str] = None
-    how_to_fix: Optional[str] = None
     image_url: Optional[str] = None  
     ai_description_suggestion: Optional[str] = None  
 
