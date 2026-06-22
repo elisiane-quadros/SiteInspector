@@ -19,6 +19,7 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+.pytest_cache/
 
 # Playwright
 playwright/.auth/
@@ -27,7 +28,8 @@ test-results/
 
 # Environments
 .env
-.env.*  
+.env.*
+!.env.example
 
 # OS / Editor
 .DS_Store
@@ -43,4 +45,4 @@ test-results/
 # Build tools
 *.local
 ANALISE_VIABILIDADE_SAAS.MD
-ROADMAP_PRETICO.md
+ROADMAP_PRATICO.md
