@@ -2,6 +2,7 @@ import { useState } from "react";
 import UrlForm from "./components/UrlForm";
 import type { AccessibilityResults } from "./interfaces/AccessibilityResults";
 import ResultCard from "./components/ResultCard";
+import InspectorLoader from "./components/InspectorLoader";
 import api from "./services/api";
 
 import type { ContrastItem } from "./interfaces/ResultContrast";
@@ -141,22 +142,21 @@ function App() {
           </div>
         )}
 
-        {result || contrastResult.length ? (
+        {loading && <InspectorLoader />}
+
+        {!loading && (result || contrastResult.length) ? (
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl text-blue-900 font-semibold mb-6 text-center">
               Resultados da Inspeção
             </h2>
             <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-              {loading ? (
-                <span>Carregando...</span>
-              ) : (
-                result && (
-                  <>
+              {result && (
+                <>
                     <ResultCard
                       title="Imagens sem descrição (alt)"
                       description="Todas as imagens devem ter texto alternativo para leitores de tela."
                       sucessDescription="Todas as imagens possuem texto alternativo."
-                      items={result.images.length ? result.images : []}
+                      items={result.images?.length ? result.images : []}
                     />
 
                     <ResultCard
@@ -200,8 +200,7 @@ function App() {
                       sucessDescription="Todos os landmarks estão presentes e corretos."
                       items={result.landmarks?.length ? result.landmarks : []}
                     />
-                  </>
-                )
+                </>
               )}
 
               {contrastLoading ? (
