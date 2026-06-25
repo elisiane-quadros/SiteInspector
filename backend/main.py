@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 import asyncio
-import nest_asyncio
+import sys
 import urllib3
 
 from backend.config.settings import get_settings
@@ -26,7 +26,11 @@ from backend.utils.ai_assistant import (
     generate_image_description
 )
 
-nest_asyncio.apply()
+# Apenas aplica correção de event loop no Windows (necessário para Playwright)
+if sys.platform == "win32":
+    import nest_asyncio
+    nest_asyncio.apply()
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 settings = get_settings()
 

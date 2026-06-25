@@ -1,5 +1,4 @@
 # Imagem base com Playwright e Python já configurados
-# Evita instalar dependências do sistema manualmente
 FROM mcr.microsoft.com/playwright/python:v1.60.0-jammy
 
 WORKDIR /app
@@ -14,8 +13,9 @@ RUN playwright install chromium
 # Copia o restante do projeto
 COPY . .
 
-# Porta exposta pelo FastAPI
+# Expõe a porta
 EXPOSE 8000
 
-# Inicia o servidor
+# Inicia o servidor com uvicorn
+# Usa 0.0.0.0 para aceitar conexões externas (necessário no Railway)
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,11 +1,10 @@
-import os
 import asyncio
 import re
 from groq import Groq
+from backend.config.settings import get_settings
 
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-
-client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
+settings = get_settings()
+client = Groq(api_key=settings.groq_api_key) if settings.groq_api_key else None
 
 SYSTEM_PROMPT_TEMPLATES = {
     "ecommerce": (

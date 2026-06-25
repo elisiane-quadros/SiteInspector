@@ -10,6 +10,7 @@ export interface PriorityItem {
 
 export interface AccessibilityResults {
   images: ResultItem[];
+  screenshots: ResultItem[];
   focus: Array<string | ResultItem>;
   forms: ResultItem[];
   headings: Array<string | ResultItem>;
