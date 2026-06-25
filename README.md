@@ -15,11 +15,11 @@
 
 <br/>
 
-> Detecta falhas de acessibilidade em tempo real, gera relatórios PDF profissionais e traduz problemas técnicos em **impacto de negócio** — com análise estratégica gerada por IA adaptada ao segmento do site.
+> Analisa websites sob demanda, identifica falhas de acessibilidade, gera relatórios PDF profissionais e traduz problemas técnicos em impacto de negócio com apoio de Inteligência Artificial.
 
 <br/>
 
-<img src="assets/resultado_inspecao_online.jpg" alt="Painel de resultados da inspeção do SiteInspector, com as categorias auditadas e botões de exportação de PDF" width="820" />
+<img src="assets/resultado_inspecao_online.png" alt="Painel de resultados da inspeção do SiteInspector, com as categorias auditadas e botões de exportação de PDF" width="820" />
 
 </div>
 
@@ -30,7 +30,7 @@
 - [Sobre o Projeto](#-sobre-o-projeto)
 - [Diferenciais Técnicos](#-diferenciais-técnicos--decisões-de-engenharia)
 - [Funcionalidades](#-funcionalidades)
-- [Interface](#-interface)
+- [Principais Recursos](#-principais-recursos)
 - [Tech Stack](#-tech-stack)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
 - [Instalação e Execução](#-instalação-e-execução)
@@ -105,27 +105,66 @@ Classificação das falhas em **P1 / P2 / P3** calculada em Python puro (sem IA)
 
 ---
 
-## 🖥️ Interface
+## 🖥️ Principais Recursos em Ação
 
-<table>
+<h3 align="center">Card detalhado da inspeção</h3>
+
+<p align="center">
+  <img
+    src="assets/card_detalhado.png"
+    width="50%"
+    alt="Card detalhado de uma inconformidade, com sugestão de texto alternativo gerada por IA"
+  />
+</p>
+
+<p align="center">
+  <sub>
+    <b>Card detalhado com IA</b> — impacto em linguagem de negócio,
+    orientação de correção e sugestão automática de <i>alt-text</i> pela IA.
+  </sub>
+</p>
+
+<br/>
+
+<h3 align="center">Relatórios gerados automaticamente</h3>
+
+<table align="center">
   <tr>
-    <td width="50%" align="center">
-      <img src="assets/card_detalhado.png" height="280" alt="Card detalhado de uma inconformidade, com sugestão de texto alternativo gerada por IA" /><br/>
-      <sub><b>Card detalhado com IA</b> — impacto em linguagem de negócio, orientação de correção e <i>alt-text</i> sugerido pela Groq.</sub>
+    <td width="33%" align="center" valign="top">
+      <img
+        src="assets/resultado_inspecao.png"
+        width="240"
+        alt="Primeira página do relatório executivo em PDF, com diagnóstico e volumetria"
+      />
+      <br/><br/>
+      <sub>
+        <b>Relatório Executivo</b><br/>
+        Diagnóstico de exposição legal e consolidado das barreiras encontradas.
+      </sub>
     </td>
-    <td width="50%" align="center">
-      <img src="assets/resultado_inspecao.png" height="280" alt="Primeira página do relatório executivo em PDF, com diagnóstico e volumetria" /><br/>
-      <sub><b>Relatório executivo (PDF)</b> — diagnóstico de exposição legal e tabela consolidada de barreiras.</sub>
+    <td width="33%" align="center" valign="top">
+      <img
+        src="assets/diagnostico_ia.png"
+        width="240"
+        alt="Página de análise estratégica do relatório, gerada por IA"
+      />
+      <br/><br/>
+      <sub>
+        <b>Análise Estratégica por IA</b><br/>
+        Recomendações adaptadas ao segmento do site analisado.
+      </sub>
     </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <img src="assets/diagnostico_ia.png" height="280" alt="Página de análise estratégica do relatório, gerada por IA" /><br/>
-      <sub><b>Análise estratégica por IA</b> — adaptada ao segmento detectado (e-commerce, SaaS ou corporativo).</sub>
-    </td>
-    <td width="50%" align="center">
-      <img src="assets/roadmaps_prioridades.png" height="280" alt="Roadmap de prioridades P1, P2 e P3 com justificativas de impacto" /><br/>
-      <sub><b>Roadmap P1/P2/P3</b> — priorização determinística com justificativa de impacto.</sub>
+    <td width="33%" align="center" valign="top">
+      <img
+        src="assets/roadmaps_prioridades.png"
+        width="240"
+        alt="Roadmap de prioridades P1, P2 e P3 com justificativas de impacto"
+      />
+      <br/><br/>
+      <sub>
+        <b>Roadmap de Prioridades</b><br/>
+        Plano de ação organizado por criticidade e impacto.
+      </sub>
     </td>
   </tr>
 </table>
