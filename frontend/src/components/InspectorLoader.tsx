@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 // chamada e aguarda, a progressão é por TEMPO (narrativa) — não são eventos
 // reais do backend. Mesmo assim, comunicar etapas reduz a sensação de espera.
 const STEPS = [
-  "Carregando a página…",
-  "Analisando imagens e formulários…",
-  "Verificando contraste e navegação por teclado…",
-  "Gerando a análise estratégica por IA…",
+  "Carregando e mapeando a estrutura do site...",
+  "Analisando imagens, formulários e elementos interativos...",
+  "Verificando conformidade com as diretrizes WCAG...",
+  "Preparando recomendações de correção com IA...",
 ];
+
+const PROGRESS = [15, 40, 75, 95];
 
 export default function InspectorLoader() {
   const [step, setStep] = useState(0);
@@ -54,6 +56,9 @@ export default function InspectorLoader() {
       <p className="text-blue-900 font-semibold text-center min-h-[1.5rem]">
         {STEPS[step]}
       </p>
+      <div className="text-sm text-gray-500 font-medium">
+        {PROGRESS[step]}%
+      </div>
 
       {/* Anúncio para leitores de tela (visualmente oculto). */}
       <span className="sr-only">

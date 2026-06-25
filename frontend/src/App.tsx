@@ -9,16 +9,14 @@ import type { ContrastItem } from "./interfaces/ResultContrast";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { TechnicalReportPDF } from "./components/TechnicalReportPDF";
 import { ExecutiveReportPDF } from "./components/ExecutiveReportPDF";
+import lupaIcon from "./assets/lupa.png";
 
 function App() {
   const [result, setResult] = useState<AccessibilityResults | null>(null);
   const [contrastResult, setContrastResult] = useState<ContrastItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
-  const [errorContrast, setErrorContrast] = useState<string>("");
-  const [contrastLoading, setContrastLoading] = useState(false);
   const [currentUrl, setCurrentUrl] = useState("");
- // const [pdfError, setPdfError] = useState<string>("");
 
   const isValidUrl = (url: string): boolean => {
     try {
@@ -45,7 +43,6 @@ function App() {
       return;
     }
     setLoading(true);
-    setContrastLoading(true);
     try {
       const { data } = await api.post("/check", { url });
 
@@ -67,7 +64,6 @@ function App() {
       return;
     } finally {
       setLoading(false);
-      setContrastLoading(false);
     }
   };
 
@@ -76,7 +72,6 @@ function App() {
     setResult(null);
     setContrastResult([]);
     setError("");
-    setErrorContrast("");
     requestCheck(url);
   };
 
@@ -84,21 +79,13 @@ function App() {
     <div className="min-h-screen bg-gray-100 flex flex-col gap-4">
       <header className="bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400 shadow-lg">
         <div className="max-w-6xl mx-auto flex p-4">
-          <div className=" flex items-center gap-4">
-            <div className="bg-white rounded-full p-2 shadow-md">
-              <svg
-                className="w-10 h-10 text-blue-700"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
+          <div className=" flex items-center gap-2">
+            <div>
+              <img
+                src={lupaIcon}
+                alt="Ícone A11y Inspector"
+                className="w-12 h-12"
+              />
             </div>
             <div>
               <h1 className="text-2xl md:text-4xl font-extrabold text-white drop-shadow">
@@ -127,18 +114,12 @@ function App() {
           url={currentUrl}
           onUrl={setCurrentUrl}
           onResult={handleCheck}
-          loading={loading || contrastLoading}
+          loading={loading}
         />
 
         {error && (
           <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
             {error}
-          </div>
-        )}
-
-        {errorContrast && (
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
-            {errorContrast}
           </div>
         )}
 
@@ -156,7 +137,7 @@ function App() {
                       title="Imagens sem descrição (alt)"
                       description="Todas as imagens devem ter texto alternativo para leitores de tela."
                       sucessDescription="Todas as imagens possuem texto alternativo."
-                      items={result.images?.length ? result.images : []}
+                      items={result.screenshots ?? []}
                     />
 
                     <ResultCard
@@ -203,39 +184,13 @@ function App() {
                 </>
               )}
 
-              {contrastLoading ? (
-                <div className="flex items-center justify-center md:col-span-1">
-                  <svg
-                    className="animate-spin h-5 w-5 text-blue-600 mr-2"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8z"
-                    ></path>
-                  </svg>
-                  <span>Carregando resultados de contraste...</span>
-                </div>
-              ) : (
-                <ResultCard
-                  title="Problemas de contraste"
-                  description="Todos os textos devem ter contraste suficiente com o fundo para garantir legibilidade."
-                  sucessDescription="Todos os textos possuem contraste adequado."
-                  items={contrastResult}
-                />
-              )}
-              {!loading && !contrastLoading && result && (
+              <ResultCard
+                title="Problemas de contraste"
+                description="Todos os textos devem ter contraste suficiente com o fundo para garantir legibilidade."
+                sucessDescription="Todos os textos possuem contraste adequado."
+                items={contrastResult}
+              />
+              {result && (
                 <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 md:col-span-2 w-full mt-4">
                   <h3 className="text-lg font-bold text-gray-800 mb-1">Exportar Relatórios Oficiais</h3>
                   <p className="text-sm text-gray-500 mb-4">Escolha o modelo de documento ideal para a sua audiência:</p>
@@ -315,8 +270,7 @@ function App() {
         ) : null}
       </div>
       <footer className="mt-auto w-full py-4 bg-blue-700 text-white text-center text-sm rounded-t shadow">
-        © 2025 por Elisiane Quadros — Desenvolvido com{" "}
-        <span className="font-bold">A11y_Inspector</span>
+        © 2026 Desenvolvido por Elisiane Quadros
       </footer>
     </div>
   );
