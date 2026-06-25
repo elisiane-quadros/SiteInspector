@@ -130,7 +130,7 @@ function App() {
             <h2 className="text-xl text-blue-900 font-semibold mb-6 text-center">
               Resultados da Inspeção
             </h2>
-            <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+            <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
               {result && (
                 <>
                     <ResultCard
@@ -191,7 +191,7 @@ function App() {
                 items={contrastResult}
               />
               {result && (
-                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 md:col-span-2 w-full mt-4">
+                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 md:col-span-2 w-full mt-1">
                   <h3 className="text-lg font-bold text-gray-800 mb-1">Exportar Relatórios Oficiais</h3>
                   <p className="text-sm text-gray-500 mb-4">Escolha o modelo de documento ideal para a sua audiência:</p>
                   
