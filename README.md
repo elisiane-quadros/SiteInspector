@@ -19,7 +19,7 @@
 
 <br/>
 
-<img src="assets/resultado_inspecao_online.jpg" alt="Painel de resultados da inspeção do SiteInspector, com as categorias auditadas e botões de exportação de PDF" width="820" />
+<img src="assets/a11y_inspector.png" alt="Painel de resultados da inspeção do SiteInspector, com as categorias auditadas e botões de exportação de PDF" width="820" />
 
 </div>
 
