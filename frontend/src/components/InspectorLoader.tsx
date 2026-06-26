@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 // Mensagens exibidas em sequência durante a espera. Como o front faz uma única
-// chamada e aguarda, a progressão é por TEMPO (narrativa) — não são eventos
+// chamada e aguarda, a progressão é por tempo (narrativa) — não são eventos
 // reais do backend. Mesmo assim, comunicar etapas reduz a sensação de espera.
 const STEPS = [
   "Carregando e mapeando a estrutura do site...",

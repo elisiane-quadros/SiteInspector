@@ -1,7 +1,7 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 
-// 💡 Configuração de fontes para garantir que o peso Bold seja renderizado corretamente sem sobreposições
+// Configuração de fontes para garantir que o peso Bold seja renderizado corretamente
 Font.register({
   family: 'Helvetica-Bold',
   src: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Medium.ttf' // Fallback seguro
@@ -186,7 +186,7 @@ export const ExecutiveReportPDF: React.FC<ExecutiveReportProps> = ({
         </View>
 
       </Page>
-      {/* 📄 PÁGINA 2: ANÁLISE DE IMPACTO E CONTEXTO DE NEGÓCIO */}
+      {/* Página 2: Análise de Impacto e Contexto de Negócio */}
       <Page size="A4" style={styles.page}>
         <View style={styles.headerContainer}>
           <Text style={styles.appTitle}>A11y_Inspector</Text>
@@ -237,7 +237,7 @@ export const ExecutiveReportPDF: React.FC<ExecutiveReportProps> = ({
           )}
         </View>
 
-        {/* 🚀 NOVA SEÇÃO: ROADMAP DE OTIMIZAÇÃO VISUAL */}
+        {/* Seção: Roadmap de Otimização Sugerido */}
         {result.priority_roadmap && result.priority_roadmap.length > 0 && (
           <View style={styles.roadmapContainer} wrap={false}>
             <Text style={styles.sectionTitle}>Roadmap de Otimização Sugerido</Text>
