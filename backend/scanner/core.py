@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 from backend.models.schemas import BaseIssue, Severity
 
-# 📝 Dicionário de Tradução: Mapeia dados técnicos para a linguagem do cliente leigo
+# Dicionário de tradução: mapeia dados técnicos para a linguagem do cliente leigo
 FRIENDLY_TEXTS = {
     "1.1.1": {
         "title": "Imagens sem descrição (Invisíveis)",

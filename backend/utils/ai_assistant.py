@@ -37,10 +37,7 @@ SYSTEM_PROMPT_TEMPLATES = {
 }
 
 async def generate_image_description(image_url: str) -> str:
-    """
-    Baixa uma imagem de forma assíncrona e utiliza o cliente `groq`
-    para gerar uma descrição alternativa (alt text) focada em e-commerce.
-    """
+    """Gera descricao alternativa (alt text) para uma imagem via Groq."""
     if not client:
         return "Configuração de IA ausente (Chave API não encontrada no ambiente)."
 

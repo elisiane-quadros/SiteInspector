@@ -31,3 +31,6 @@ uvicorn==0.48.0
 watchfiles==1.2.0
 wcag-contrast-ratio==0.9
 websockets==16.0
+
+# --- Desenvolvimento ---
+pytest>=9.0.0

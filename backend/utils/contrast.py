@@ -3,7 +3,7 @@ from backend.models.schemas import ContrastIssue
 from backend.utils.color_parser import parse_color, is_large_text
 
 # Script executado no navegador para coletar texto + cores computadas dos elementos
-# visíveis. Roda dentro da MESMA sessão de render usada pela análise estrutural
+# visíveis. Roda dentro da mesma sessão de render usada pela análise estrutural
 # (ver html_fetcher.fetch_page) — assim a página é carregada uma única vez.
 CONTRAST_JS = """
     (maxEl) => {
