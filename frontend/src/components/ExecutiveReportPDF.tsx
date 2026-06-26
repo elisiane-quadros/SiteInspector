@@ -1,7 +1,6 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 
-// Configuração de fontes para garantir que o peso Bold seja renderizado corretamente
 Font.register({
   family: 'Helvetica-Bold',
   src: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Medium.ttf' // Fallback seguro
@@ -37,7 +36,6 @@ export const ExecutiveReportPDF: React.FC<ExecutiveReportProps> = ({
   executiveAnalysis = "",
 }) => {
 
-  // Contabilidade dos problemas de forma segura
   const totalImages = result.images?.length || 0;
   const totalForms = result.forms?.length || 0;
   const totalHeadings = result.headings?.length || 0;
@@ -58,7 +56,6 @@ export const ExecutiveReportPDF: React.FC<ExecutiveReportProps> = ({
 
   const risk = getRiskLevel(totalGeral);
 
-  // Formatação da data atual
   const formattedDate = new Date().toLocaleString('pt-PT', {
     day: '2-digit',
     month: '2-digit',
@@ -68,7 +65,6 @@ export const ExecutiveReportPDF: React.FC<ExecutiveReportProps> = ({
     second: '2-digit'
   });
 
-  // Função auxiliar interna para quebrar a string da IA em blocos limpos na Página 2
   const parseAnalysisText = (text: string) => {
     if (!text) return [];
     return text
@@ -79,7 +75,6 @@ export const ExecutiveReportPDF: React.FC<ExecutiveReportProps> = ({
 
   const analysisLines = parseAnalysisText(executiveAnalysis);
 
-  // Função auxiliar para definir as cores dinâmicas dos cards por prioridade
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'P1':
@@ -125,13 +120,11 @@ export const ExecutiveReportPDF: React.FC<ExecutiveReportProps> = ({
         <View style={styles.tableContainer} wrap={false}>
           <Text style={styles.sectionTitle}>Volumetria de Barreiras Encontradas</Text>
           
-          {/* Header da Tabela */}
           <View style={styles.tableHeader}>
             <Text style={[styles.tableCellHeader, { flex: 3 }]}>Categoria de Impacto Operacional</Text>
             <Text style={[styles.tableCellHeader, { flex: 1, textAlign: 'center' }]}>Ocorrências</Text>
           </View>
 
-          {/* Linhas da Tabela (Estilo Zebra Embutido de Forma Limpa) */}
           <View style={styles.tableRow}>
             <Text style={[styles.tableCell, { flex: 3 }]}>Imagens sem Descrição (Acessibilidade Visual e SEO)</Text>
             <Text style={[styles.tableCell, { flex: 1, textAlign: 'center', fontFamily: 'Helvetica-Bold' }]}>{totalImages}</Text>
@@ -172,14 +165,12 @@ export const ExecutiveReportPDF: React.FC<ExecutiveReportProps> = ({
             <Text style={[styles.tableCell, { flex: 1, textAlign: 'center', fontFamily: 'Helvetica-Bold' }]}>{totalContrast}</Text>
           </View>
 
-          {/* Linha de Total Geral */}
           <View style={styles.tableTotalRow}>
             <Text style={[styles.tableCellTotal, { flex: 3 }]}>Total de Inconformidades Ativas</Text>
             <Text style={[styles.tableCellTotal, { flex: 1, textAlign: 'center', color: risk.color }]}>{totalGeral}</Text>
           </View>
         </View>
 
-        {/* RODAPÉ INSTITUCIONAL */}
         <View style={styles.footer} fixed>
           <Text>Documento Confidencial - Gerado automaticamente via A11y_Inspector.</Text>
           <Text>Todos os direitos reservados © 2026.</Text>
