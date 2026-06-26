@@ -45,7 +45,7 @@ export default function ResultCard({
         )}
       </div>
 
-      {/* --- JANELA MODAL ESTRUTURADA (PRODUÇÃO) --- */}
+      {/* Janela modal estruturada */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in">
           <div className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[85vh] flex flex-col overflow-hidden">
@@ -107,7 +107,7 @@ export default function ResultCard({
                             rel="noreferrer" 
                             className="inline-block text-xs text-purple-700 hover:underline mt-1 font-medium"
                           >
-                            🔗 Visualizar imagem original afetada
+                            Visualizar imagem original afetada
                           </a>
                         )}
                       </div>
@@ -117,7 +117,7 @@ export default function ResultCard({
                     {!isString && (item.html || item.message) && (
                       <details className="group border border-gray-200 rounded-lg bg-gray-50 overflow-hidden transition-all">
                         <summary className="list-none flex justify-between items-center p-3 text-xs font-semibold text-gray-500 cursor-pointer hover:bg-gray-100 select-none">
-                          <span>🛠️ DETALHES TÉCNICOS (PARA DESENVOLVEDORES)</span>
+                          <span>DETALHES TÉCNICOS (PARA DESENVOLVEDORES)</span>
                           <span className="transition-transform group-open:rotate-180 text-gray-400">▼</span>
                         </summary>
                         <div className="p-4 border-t border-gray-200 bg-white space-y-3 text-xs font-mono">

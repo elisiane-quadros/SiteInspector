@@ -1,7 +1,7 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 
-// Configuração de fonte robusta para o layout técnico
+// Configuração de fonte para o layout técnico
 Font.register({
   family: 'Helvetica-Bold',
   src: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Medium.ttf'

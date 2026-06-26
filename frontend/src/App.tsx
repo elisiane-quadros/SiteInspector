@@ -46,7 +46,7 @@ function App() {
     try {
       const { data } = await api.post("/check", { url });
 
-      // 💡 GARANTIA DE FORMATO: Se o backend devolver a estrutura dentro de data.results ou direto em data
+      // Garantia de formato: suporta tanto data.results aninhado quanto data direto
       const finalResults = {
         ...data.results,
         url: data.url || url,
