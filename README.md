@@ -8,9 +8,16 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.136-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React_19-TypeScript-3178C6?style=flat-square&logo=react&logoColor=white)](https://react.dev)
 [![Playwright](https://img.shields.io/badge/Playwright-1.60-45ba4b?style=flat-square&logo=playwright&logoColor=white)](https://playwright.dev)
+[![Testes](https://img.shields.io/badge/Testes-65%20passing-success?style=flat-square&logo=pytest&logoColor=white)]()
 [![Groq](https://img.shields.io/badge/Groq%20Llama-F55036?style=flat-square&logo=groq&logoColor=white)](https://groq.com)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docker.com)
 [![Licence](https://img.shields.io/badge/Licen%C3%A7a-Propriet%C3%A1ria-6B21A8?style=flat-square)]()
+
+<br/>
+
+> 🔗 **[Acesse a demonstração](https://site-inspector-eq.vercel.app/)** — nenhum cadastro necessário.
+
+<br/>
 
 <br/>
 
@@ -181,7 +188,7 @@ A escolha de cada tecnologia considera o cenário atual e a evolução prevista 
 | Tecnologia | Por que foi escolhida |
 |---|---|
 | **Docker** | A imagem `mcr.microsoft.com/playwright/python` já inclui Python, navegador Chromium e todas as dependências de sistema necessárias. Elimina conflitos de ambiente e simplifica o deploy em qualquer plataforma de container. |
-| **Railway** | Deploy serverless com detecção automática de Dockerfile. Suporte nativo a variáveis de ambiente e domínios customizados. |
+| **Render** | Plataforma de deploy com suporte nativo a Docker. Utilizada para hospedar o backend com Playwright em ambiente Linux, garantindo compatibilidade com as dependências de sistema do navegador headless. |
 | **Vercel** | Deploy otimizado para SPAs React/Vite com preview automático por branch e CDN global. |
 
 ---
@@ -271,7 +278,23 @@ SiteInspector/
 ```
 
 ---
+## Testes
 
+A cobertura de testes cobre as camadas críticas do backend — motor de auditoria, parsing de cores, cálculo de contraste, detecção de segmento de negócio e geração do roadmap de prioridades.
+
+| Arquivo | Cobertura |
+|---|---|
+| `test_scanner_core.py` | Motor de auditoria — imagens, formulários, headings, links, botões, landmarks e navegação por teclado |
+| `test_contrast.py` | Cálculo de contraste WCAG 1.4.3 |
+| `test_color_parser.py` | Parsing de cores CSS para tuplas RGB |
+| `test_business_segment.py` | Detecção de segmento de negócio (e-commerce, SaaS, corporativo) |
+| `test_priority.py` | Geração e ordenação do roadmap P1/P2/P3 |
+
+```bash
+python -m pytest tests/ -v
+# 65 passed in ~1.4s
+```
+---
 ## Roadmap
 
 - **A11y Inspector.** Disponível.
@@ -288,7 +311,7 @@ SiteInspector/
 
 ## Licença
 
-Este projeto é proprietário. O código-fonte não pode ser reutilizado, modificado ou redistribuído sem autorização expressa da autora.
+Este projeto é proprietário. O código-fonte está disponível publicamente para avaliação técnica, mas não pode ser reutilizado, modificado ou redistribuído sem autorização expressa da autora. O SiteInspector está em desenvolvimento ativo como produto SaaS.
 
 © 2026 Elisiane Quadros. Todos os direitos reservados.
 
