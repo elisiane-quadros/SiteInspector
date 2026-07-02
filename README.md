@@ -1,6 +1,6 @@
-# SiteInspector
+# A11y Inspector
 
-**Plataforma Inteligente de Auditoria para Websites**
+**Auditoria de Acessibilidade Digital com Inteligência Artificial**
 
 ---
 
@@ -11,7 +11,7 @@
 [![Testes](https://img.shields.io/badge/Testes-65%20passing-success?style=flat-square&logo=pytest&logoColor=white)]()
 [![Groq](https://img.shields.io/badge/Groq%20Llama-F55036?style=flat-square&logo=groq&logoColor=white)](https://groq.com)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docker.com)
-[![Licence](https://img.shields.io/badge/Licen%C3%A7a-Propriet%C3%A1ria-6B21A8?style=flat-square)]()
+[![Status](https://img.shields.io/badge/Status-Em%20produ%C3%A7%C3%A3o-2ea44f?style=flat-square)]()
 
 <br/>
 
@@ -19,11 +19,7 @@
 
 <br/>
 
-<br/>
-
-**SiteInspector** é uma plataforma em desenvolvimento para auditoria automatizada de websites. Ela será composta por módulos especializados que inspecionam diferentes aspectos de um site — acessibilidade, privacidade, segurança, SEO — de forma isolada ou combinada.
-
-O **A11y Inspector** é o primeiro módulo disponível. Ele realiza inspeções sob demanda de acessibilidade digital com base nas diretrizes WCAG 2.1 e na Lei Brasileira de Inclusão (LBI), combinando automação com navegador headless, parsing de HTML e inteligência artificial para gerar relatórios PDF estratégicos e técnicos.
+O **A11y Inspector** é uma ferramenta de auditoria de acessibilidade digital. Ela analisa websites sob demanda, detecta falhas com base nas diretrizes WCAG 2.1 e na Lei Brasileira de Inclusão (LBI), utiliza inteligência artificial para gerar análises estratégicas e produz relatórios PDF prontos para gestores e equipes técnicas.
 
 <br/>
 
@@ -31,13 +27,13 @@ O **A11y Inspector** é o primeiro módulo disponível. Ele realiza inspeções 
 
 ---
 
-## Sobre o SiteInspector
+## Sobre o Projeto
 
-O SiteInspector nasceu como um projeto de demonstração de engenharia backend Python com foco em IA e automação. Durante o desenvolvimento, ficou claro que o modelo de inspeção automatizada poderia se estender para outras áreas além de acessibilidade.
+O A11y Inspector foi construído para resolver um problema específico: automatizar inspeções de acessibilidade digital combinando backend assíncrono, inteligência artificial multimodal e renderização headless — e transformar o resultado em algo útil tanto para engenheiros quanto para gestores.
 
-A visão da plataforma é oferecer um conjunto de módulos especializados que compartilham a mesma infraestrutura de back-end, sessão de navegador headless e pipeline de IA, permitindo que cada inspeção seja realizada de forma isolada ou composta.
+O backend é escrito em Python com FastAPI, utiliza Playwright para renderizar páginas reais e BeautifulSoup para análise estrutural do HTML. Dois modelos de LLM especializados são consumidos via API Groq: um para gerar descrições alternativas de imagens (multimodal) e outro para produzir relatórios executivos estratégicos adaptados ao segmento de negócio do site alvo (e-commerce, SaaS ou corporativo). O frontend é uma SPA em React com TypeScript que renderiza dois tipos de PDF no client-side.
 
-Atualmente, a plataforma conta com o módulo de acessibilidade implementado. Os demais módulos fazem parte do roadmap de evolução do produto.
+> **Visão futura.** Este é o primeiro módulo do **SiteInspector**, um projeto guarda-chuva que prevê a criação de uma plataforma modular de auditoria web. Os demais módulos (privacidade, segurança, SEO) estão em estágio de planejamento e não estão implementados.
 
 ---
 
@@ -50,9 +46,10 @@ Apesar desse cenário, muitas organizações ainda dependem de auditorias manuai
 O mercado carece de ferramentas que:
 
 - Realizem inspeções automatizadas e sob demanda.
-- Traduzam problemas técnicos em informações úteis para gestores e equipes de compliance.
+- Traduzam problemas técnicos em informações úteis para gestores e compliance.
 - Gerem relatórios técnicos e executivos prontos para tomada de decisão.
 - Adaptem recomendações ao contexto de diferentes segmentos, como e-commerce, SaaS e sites institucionais.
+
 ---
 
 ## Solução
@@ -61,7 +58,7 @@ O A11y Inspector resolve esse problema combinando três camadas complementares:
 
 1. **Inspeção automatizada.** Um motor de auditoria percorre o HTML do site alvo e identifica falhas estruturais — imagens sem descrição, formulários sem rótulo, hierarquia de títulos quebrada, links vagos, botões inacessíveis, landmarks ausentes e problemas de navegação por teclado. A análise de contraste de cores é feita sobre o DOM real renderizado via Playwright.
 
-2. **Inteligência artificial contextual.** A plataforma consome dois modelos distintos da API Groq: um para gerar descrições alternativas de imagens via análise multimodal, e outro para produzir relatórios executivos estratégicos adaptados ao segmento de negócio detectado automaticamente (e-commerce, SaaS ou corporativo).
+2. **Inteligência artificial contextual.** A ferramenta consome dois modelos distintos da API Groq: um para gerar descrições alternativas de imagens via análise multimodal, e outro para produzir relatórios executivos estratégicos adaptados ao segmento de negócio detectado automaticamente.
 
 3. **Relatórios duplos em PDF.** Cada inspeção gera dois documentos: um Relatório Executivo para gestores e compliance, com análise de risco legal e impacto de negócio; e um Checklist Técnico para desenvolvedores, com ocorrências, snippets HTML e orientações de correção.
 
@@ -102,18 +99,7 @@ As falhas são classificadas em três níveis de prioridade por um algoritmo em 
 
 ---
 
-## Módulos da Plataforma
-
-| Módulo | Status |
-|---|---|
-| **A11y Inspector** | Disponível |
-| Privacy Inspector | Planejado |
-| Security Inspector | Planejado |
-| SEO Inspector | Planejado |
-
----
-
-## Funcionalidades do A11y Inspector
+## Funcionalidades
 
 | Funcionalidade | Critério WCAG |
 |---|---|
@@ -126,6 +112,8 @@ As falhas são classificadas em três níveis de prioridade por um algoritmo em 
 | **Landmarks Semânticos** — verifica presença de `<main>`, `<nav>`, `<header>` e `<footer>` | 1.3.6 |
 | **Contraste de Cores** — análise dinâmica via Playwright sobre o DOM renderizado | 1.4.3 |
 | **Roadmap de Prioridades** — classificação P1/P2/P3 com justificativa de impacto | — |
+| **Relatório Executivo com IA** — análise estratégica gerada por segmento de negócio | — |
+| **Checklist Técnico em PDF** — ocorrências, snippets HTML e orientações de correção | — |
 
 ---
 
@@ -157,39 +145,39 @@ Destinado a gestores, liderança e compliance.
 
 Destinado à equipe de desenvolvimento, contendo ocorrências detalhadas, snippets HTML, critérios WCAG e orientações de correção.
 
-## Stack Tecnológica
+---
 
-A escolha de cada tecnologia considera o cenário atual e a evolução prevista para a plataforma.
+## Stack Tecnológica
 
 ### Backend
 
 | Tecnologia | Por que foi escolhida |
 |---|---|
-| **Python 3.11+** | Ecossistema maduro para IA/ML, automação e processamento de dados. Tipagem gradual com suporte a `Optional` e `Union` do `typing` permite código expressivo e seguro. |
-| **FastAPI 0.136** | Performance assíncrona nativa com `async/await`, validação automática via Pydantic e geração de documentação OpenAPI interativa. Essencial para operações de I/O intensivas como scraping e chamadas de API. |
-| **Playwright 1.60** | Única ferramenta que oferece renderização headless confiável com suporte multi-navegador e injeção de JavaScript arbitrário no DOM real. Necessário para análise de contraste e parsing de SPAs. |
-| **BeautifulSoup4 + lxml** | Parsing de HTML rápido e tolerante a erros de marcação. Mais leve que Playwright para análise estrutural onde o DOM renderizado não é necessário. |
-| **Groq SDK** | API de LLMs com latência significativamente menor que concorrentes (inferência em hardware dedicado LPU). Viabiliza a geração de relatórios em segundos, não minutos. |
-| **Pydantic + Pydantic Settings** | Serialização com validação de tipos em tempo de execução. A camada `BaseSettings` gerencia configuração via `.env` com cache LRU, eliminando arquivos de configuração manuais. |
-| **Uvicorn 0.48** | Servidor ASGI de alto desempenho, necessário para servir aplicações FastAsyncIO. |
-| **httpx** | Cliente HTTP assíncrono com suporte a conexões keep-alive e timeouts configuráveis. |
+| **Python 3.11+** | Ecossistema maduro para IA/ML, automação e processamento de dados. |
+| **FastAPI 0.136** | Performance assíncrona nativa com `async/await` e validação via Pydantic. |
+| **Playwright 1.60** | Renderização headless confiável para análise de contraste e parsing de SPAs. |
+| **BeautifulSoup4 + lxml** | Parsing de HTML rápido e tolerante a erros de marcação. |
+| **Groq SDK** | API de LLMs com latência reduzida (inferência em hardware LPU dedicado). |
+| **Pydantic + Pydantic Settings** | Serialização validada e configuração via `.env` com cache LRU. |
+| **Uvicorn 0.48** | Servidor ASGI para aplicações FastAsyncIO. |
+| **httpx** | Cliente HTTP assíncrono com keep-alive e timeouts configuráveis. |
 
 ### Frontend
 
 | Tecnologia | Por que foi escolhida |
 |---|---|
-| **React 19 + TypeScript** | Componentização com tipagem estática reduz erros em tempo de desenvolvimento. O ecossistema maduro de bibliotecas (Axios, react-pdf) acelera a implementação de features como download de PDF e consumo de API. |
-| **Tailwind CSS 3.4** | Estilização utilitária que elimina a necessidade de arquivos CSS avulsos. Responsivo por padrão, o que facilita a adaptação futura para dashboard e histórico. |
-| **Vite 6.3** | Build tool com hot-reload instantâneo e bundler otimizado via Rollup. Substitui Webpack com configuração mínima. |
-| **@react-pdf/renderer** | Geração de PDF no client-side sem necessidade de servidor dedicado. Documentos renderizados no navegador evitam custos de processamento no backend. |
+| **React 19 + TypeScript** | Componentização com tipagem estática. |
+| **Tailwind CSS 3.4** | Estilização utilitária e responsiva sem arquivos CSS avulsos. |
+| **Vite 6.3** | Build tool com hot-reload instantâneo. |
+| **@react-pdf/renderer** | Geração de PDF no client-side sem servidor dedicado. |
 
 ### Infraestrutura
 
 | Tecnologia | Por que foi escolhida |
 |---|---|
-| **Docker** | A imagem `mcr.microsoft.com/playwright/python` já inclui Python, navegador Chromium e todas as dependências de sistema necessárias. Elimina conflitos de ambiente e simplifica o deploy em qualquer plataforma de container. |
-| **Render** | Plataforma de deploy com suporte nativo a Docker. Utilizada para hospedar o backend com Playwright em ambiente Linux, garantindo compatibilidade com as dependências de sistema do navegador headless. |
-| **Vercel** | Deploy otimizado para SPAs React/Vite com preview automático por branch e CDN global. |
+| **Docker** | Imagem oficial `playwright/python` com todas as dependências de sistema. |
+| **Render** | Deploy do backend containerizado com suporte nativo a Docker. |
+| **Vercel** | Deploy do frontend SPA React com CDN global. |
 
 ---
 
@@ -221,7 +209,7 @@ O frontend é uma aplicação de página única que consome a API do backend. O 
 ## Estrutura do Projeto
 
 ```
-SiteInspector/
+A11yInspector/
 │
 ├── Dockerfile                          # Imagem Docker com Playwright + Python
 ├── railway.json                        # Configuração de deploy no Railway
@@ -233,54 +221,52 @@ SiteInspector/
 ├── backend/
 │   ├── __init__.py
 │   ├── main.py                         # Endpoints FastAPI e orquestração do pipeline
-│   ├── requirements.txt                # Dependências Python
+│   ├── requirements.txt
 │   ├── config/
-│   │   └── settings.py                 # Configurações gerenciadas por Pydantic Settings
+│   │   └── settings.py                 # Configurações via Pydantic Settings
 │   ├── models/
 │   │   └── schemas.py                  # Contratos de dados com herança e tipagem combinatória
 │   ├── scanner/
-│   │   └── core.py                     # Motor de auditoria estrutural (imagens, forms, etc.)
+│   │   └── core.py                     # Motor de auditoria estrutural
 │   └── utils/
-│       ├── ai_assistant.py             # Pipeline Groq para relatório e descrição de imagens
+│       ├── ai_assistant.py             # Pipeline Groq (relatório + descrição de imagens)
 │       ├── contrast.py                 # Análise de contraste via Playwright
-│       ├── color_parser.py             # Parsing de cores CSS para tuplas RGB
+│       ├── color_parser.py             # Parsing de cores CSS
 │       ├── html_fetcher.py             # Gerenciador de sessão única do Playwright
-│       └── priority.py                 # Gerador de roadmap de prioridades (P1/P2/P3)
+│       └── priority.py                 # Gerador de roadmap P1/P2/P3
 │
 ├── frontend/
-│   ├── vercel.json                     # Configuração de deploy na Vercel
-│   ├── .env.production                 # Variáveis de ambiente de produção
-│   ├── vite.config.ts                  # Configuração do Vite + Vitest
-│   ├── tsconfig.json                   # TypeScript
+│   ├── vercel.json
+│   ├── .env.production
+│   ├── vite.config.ts
 │   └── src/
-│       ├── App.tsx                     # Componente raiz
+│       ├── App.tsx
 │       ├── components/
-│       │   ├── UrlForm.tsx             # Formulário de entrada da URL
-│       │   ├── InspectorLoader.tsx     # Loader durante a inspeção
-│       │   ├── ResultCard.tsx          # Card de resultado com modal de detalhes
-│       │   ├── ExecutiveReportPDF.tsx  # PDF para gestão e compliance
-│       │   └── TechnicalReportPDF.tsx  # PDF para engenharia e TI
+│       │   ├── UrlForm.tsx
+│       │   ├── InspectorLoader.tsx
+│       │   ├── ResultCard.tsx
+│       │   ├── ExecutiveReportPDF.tsx
+│       │   └── TechnicalReportPDF.tsx
 │       ├── interfaces/
-│       │   ├── AccessibilityResults.ts # Tipo principal do resultado da inspeção
-│       │   ├── ResultItem.ts           # Tipo de item individual de falha
-│       │   └── ResultContrast.ts       # Tipo de item de falha de contraste
+│       │   ├── AccessibilityResults.ts
+│       │   ├── ResultItem.ts
+│       │   └── ResultContrast.ts
 │       └── services/
-│           └── api.ts                  # Cliente Axios configurado
+│           └── api.ts
 │
 └── tests/
     ├── __init__.py
-    ├── conftest.py                     # Configuração global de path para imports
-    ├── test_scanner_core.py            # Testes do motor de auditoria (BeautifulSoup)
-    ├── test_contrast.py                # Testes de cálculo de contraste WCAG
-    ├── test_color_parser.py            # Testes de parsing de cores CSS
-    ├── test_business_segment.py        # Testes de detecção de segmento de negócio
-    └── test_priority.py                # Testes de geração do roadmap P1/P2/P3
+    ├── conftest.py
+    ├── test_scanner_core.py
+    ├── test_contrast.py
+    ├── test_color_parser.py
+    ├── test_business_segment.py
+    └── test_priority.py
 ```
 
 ---
-## Testes
 
-A cobertura de testes cobre as camadas críticas do backend — motor de auditoria, parsing de cores, cálculo de contraste, detecção de segmento de negócio e geração do roadmap de prioridades.
+## Testes
 
 | Arquivo | Cobertura |
 |---|---|
@@ -294,11 +280,15 @@ A cobertura de testes cobre as camadas críticas do backend — motor de auditor
 python -m pytest tests/ -v
 # 65 passed in ~1.4s
 ```
+
 ---
+
 ## Roadmap
 
-- **A11y Inspector.** Disponível.
-- **Landing Page do SiteInspector.** Em desenvolvimento.
+Os itens abaixo representam a visão de evolução do projeto. Apenas o primeiro está implementado.
+
+- **A11y Inspector.** Disponível e em produção.
+- **SiteInspector — Landing Page.** Em desenvolvimento.
 - **Dashboard com histórico de inspeções.** Planejado.
 - **Autenticação de usuários (JWT).** Planejado.
 - **Módulo Privacy Inspector.** Planejado.
@@ -311,7 +301,7 @@ python -m pytest tests/ -v
 
 ## Licença
 
-Este projeto é proprietário. O código-fonte está disponível publicamente para avaliação técnica, mas não pode ser reutilizado, modificado ou redistribuído sem autorização expressa da autora. O SiteInspector está em desenvolvimento ativo como produto SaaS.
+Este projeto é proprietário. O código-fonte está disponível publicamente para avaliação técnica, mas não pode ser reutilizado, modificado ou redistribuído sem autorização expressa da autora.
 
 © 2026 Elisiane Quadros. Todos os direitos reservados.
 
