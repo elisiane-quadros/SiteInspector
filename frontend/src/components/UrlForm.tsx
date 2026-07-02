@@ -26,6 +26,7 @@ export default function UrlForm({
         </label>
         <div className="flex gap-4">
           <input
+            id="url-input"
             type="text"
             value={url}
             onChange={(e) => onUrl(e.target.value)}
