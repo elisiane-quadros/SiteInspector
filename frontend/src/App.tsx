@@ -78,7 +78,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col gap-4">
       <header className="bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400 shadow-lg">
-        <div className="max-w-6xl mx-auto flex p-4">
+        <nav className="max-w-6xl mx-auto flex p-4" aria-label="Navegação principal">
           <div className=" flex items-center gap-2">
             <div>
               <img
@@ -96,10 +96,10 @@ function App() {
               </p>
             </div>
           </div>
-        </div>
+        </nav>
       </header>
 
-      <div className="max-w-6xl mx-auto flex flex-col gap-4 px-4">
+      <main className="max-w-6xl mx-auto flex flex-col gap-4 px-4">
         <div className="bg-blue-50 border-l-4 border-blue-400 p-4  rounded">
           <p className="text-blue-900 font-semibold">
             Acessibilidade digital é fundamental para garantir que todas as
@@ -268,7 +268,7 @@ function App() {
             </div>
           </div>
         ) : null}
-      </div>
+      </main>
       <footer className="mt-auto w-full py-4 bg-blue-700 text-white text-center text-sm rounded-t shadow">
         © 2026 Desenvolvido por Elisiane Quadros
       </footer>
