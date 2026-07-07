@@ -208,3 +208,9 @@ async def root():
         "version": "2.0.0",
         "docs": "/docs"
     }
+
+
+@app.get("/health")
+async def health_check():
+    """Endpoint para monitoramento de disponibilidade (keep-alive)."""
+    return {"status": "ok"}
