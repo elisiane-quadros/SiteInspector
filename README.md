@@ -311,6 +311,6 @@ Este projeto é proprietário. O código-fonte está disponível publicamente pa
 
 **Elisiane Quadros**
 
-Desenvolvedora Backend Python | Inteligência Artificial e Automação
+Desenvolvedora Python | Full Stack | IA, Automação & LLMs | FastAPI
 
 [LinkedIn](https://www.linkedin.com/in/elisiane-quadros/) &nbsp;·&nbsp; [GitHub](https://github.com/elisiane-quadros)
