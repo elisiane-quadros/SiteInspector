@@ -30,7 +30,7 @@ export default function UrlForm({
             type="text"
             value={url}
             onChange={(e) => onUrl(e.target.value)}
-            placeholder="Digite a URL do site"
+            placeholder="ex: site.com.br, www.site.com, https://site.com"
             className="w-full border border-gray-300 p-2 rounded  focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />

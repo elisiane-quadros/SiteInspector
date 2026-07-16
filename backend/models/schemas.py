@@ -1,10 +1,25 @@
-from pydantic import BaseModel, HttpUrl
-from typing import Dict, List, Optional,Union, Any
+from pydantic import BaseModel, HttpUrl, field_validator 
+from typing import Dict, List, Optional, Union, Any
 from enum import Enum
 
 
 class AnalysisRequest(BaseModel):
     url: HttpUrl
+
+    @field_validator("url", mode="before")
+    @classmethod
+    def normalize_url(cls, value) -> str:
+        """Aceita URLs com ou sem protocolo, adicionando https:// quando necessário."""
+        if  isinstance(value, str):
+           value = value.strip()
+
+        if not value:
+            raise ValueError("URL não pode estar vazia.")
+
+        if not value.startswith(("http://", "https://")):
+            value = f"https://{value}"
+
+        return value
 
 
 class Severity(str, Enum):
@@ -42,6 +57,7 @@ class ContrastIssue(BaseModel):
 class ImageAccessibilityIssue(BaseIssue):
     image_url: Optional[str] = None  
     ai_description_suggestion: Optional[str] = None  
+
 
 class AnalysisResult(BaseModel):
     success: bool

@@ -10,8 +10,11 @@ class Settings(BaseSettings):
     # Endereços do frontend com permissão de chamar a API
     allowed_origins: str = "http://localhost:5173"
 
-    # Tempo máximo de espera para requisições externas (segundos)
+    # Tempo máximo para carregamento inicial da página (segundos)
     request_timeout: int = 30
+
+    #Tempo máximo aguardando a estabilização da rede após o carregamento (segundos)
+    network_timeout: int = 8
 
     # Máximo de elementos analisados por página
     max_elements: int = 200
