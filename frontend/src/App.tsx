@@ -18,6 +18,17 @@ function App() {
   const [error, setError] = useState<string>("");
   const [currentUrl, setCurrentUrl] = useState("");
 
+    /** Adiciona https:// automaticamente se o protocolo estiver ausente. */
+  const normalizeUrl = (url: string): string => {
+    const trimmedUrl = url.trim();
+
+    if (!/^https?:\/\//i.test(trimmedUrl)) {
+      return `https://${trimmedUrl}`;
+    }
+
+    return trimmedUrl;
+  };
+
   const isValidUrl = (url: string): boolean => {
     try {
       new URL(url);
@@ -27,29 +38,37 @@ function App() {
     }
   };
 
+  /** Extrai o nome do domínio mesmo sem protocolo — funciona com "site.com.br", "www.site.com", etc. */
   const extractDomainName = (url: string): string => {
-  try {
-    return new URL(url).hostname.replace("www.", "").split(".")[0];
-  } catch {
-    return "site";
-  }
-};
+    try {
+      return new URL(url)
+      .hostname
+      .replace("www.", "")
+      .split(".")[0];
+    } catch {
+      return "site";
+    }
+  };
 
   const requestCheck = async (url: string) => {
-    if (!isValidUrl(url)) {
+    const normalizedUrl = normalizeUrl(url);
+    
+    if (!isValidUrl(normalizedUrl)) {
       setError(
-        "URL inválida. Por favor, insira uma URL válida (ex: https://www.site.com)."
+        "URL inválida. Por favor, insira uma URL válida (ex: site.com.br, www.site.com ou https://site.com)."
       );
       return;
     }
+
     setLoading(true);
+    
     try {
-      const { data } = await api.post("/check", { url });
+      const { data } = await api.post("/check", { url: normalizedUrl });
 
       // Garantia de formato: suporta tanto data.results aninhado quanto data direto
       const finalResults = {
         ...data.results,
-        url: data.url || url,
+        url: data.url || normalizedUrl,
         business_segment: data.business_segment,
         executive_analysis: data.executive_analysis,
         priority_roadmap: data.priority_roadmap
@@ -68,6 +87,7 @@ function App() {
   };
 
   const handleCheck = (url: string) => {
+    // Guarda o valor original para o input (sem alterar o que o usuário digitou)
     setCurrentUrl(url);
     setResult(null);
     setContrastResult([]);

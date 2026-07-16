@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from playwright.async_api import TimeoutError
 from fastapi.middleware.cors import CORSMiddleware
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
@@ -64,7 +65,20 @@ app.add_middleware(
 async def check_accessibility(data: AnalysisRequest):
     async with browser_session() as page:
         try:
-            await page.goto(str(data.url),wait_until="networkidle",timeout=settings.request_timeout * 1000)
+            await page.goto(
+                str(data.url),
+                wait_until="domcontentloaded",
+                timeout=settings.request_timeout * 1000
+            )
+
+            try:
+                await page.wait_for_load_state(
+                    "networkidle", 
+                    timeout=settings.network_timeout * 1000
+                )
+            except TimeoutError:
+                pass
+
             html = await page.content()
             soup = BeautifulSoup(html, "lxml")
 
