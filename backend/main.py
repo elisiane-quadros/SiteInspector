@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from playwright.async_api import TimeoutError
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,7 +19,7 @@ from backend.scanner.core import (
     check_missing_landmarks,
     check_keyboard_navigation
 )
-from backend.utils.html_fetcher import browser_session
+from backend.utils.html_fetcher import browser_session, init_browser, close_browser
 from backend.utils.contrast import check_text_contrast
 from backend.utils.priority import generate_priority_roadmap
 from backend.utils.ai_assistant import (
@@ -46,10 +47,28 @@ AI_IMAGE_FALLBACK = (
     "do conteúdo ou da função da imagem para leitores de tela."
 )
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Gerencia o ciclo de vida do navegador Chromium:
+    - Startup: inicializa o navegador UMA ÚNICA VEZ (Browser Singleton)
+    - Shutdown: fecha o navegador e libera recursos
+    """
+    print("[LIFESPAN] Inicializando navegador Chromium (singleton)...")
+    await init_browser()
+    print("[LIFESPAN] Navegador pronto. Servidor operacional.")
+    yield
+    print("[LIFESPAN] Desligando servidor — fechando navegador...")
+    await close_browser()
+    print("[LIFESPAN] Navegador fechado. Recursos liberados.")
+
+
 app = FastAPI(
     title="A11y Inspector API",
     description="API para análise automatizada de acessibilidade digital.",
-    version="2.0.0"
+    version="2.0.0",
+    lifespan=lifespan
 )
 
 app.add_middleware(
