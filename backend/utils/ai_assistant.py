@@ -1,7 +1,12 @@
 import asyncio
+import logging
 import re
+
 from groq import Groq
+
 from backend.config.settings import get_settings
+
+logger = logging.getLogger(__name__)
 
 settings = get_settings()
 client = Groq(api_key=settings.groq_api_key) if settings.groq_api_key else None
@@ -9,12 +14,12 @@ client = Groq(api_key=settings.groq_api_key) if settings.groq_api_key else None
 SYSTEM_PROMPT_TEMPLATES = {
     "ecommerce": (
         "Você é um Auditor de Acessibilidade Digital e Especialista em CRO (Conversion Rate Optimization) para E-commerce.\n"
-        "Sua missão é transformar cada erro técnico de acessibilidade em um impacto financeiro concreto e mensurável.\n\n"
+        "Sua missão é transformar cada erro técnico de acessibilidade em impacto de negócio concreto e compreensível.\n\n"
         "Diretrizes obrigatórias:\n"
-        "- Quantifique perdas: use estimativas de mercado (ex: '15% dos usuários com deficiência visual abandonam checkout sem aria-label nos botões').\n"
+        "- Conecte cada barreira a perda de conversão de forma qualitativa: abandono de checkout, exclusão de compradores com deficiência, fricção no funil de compra.\n"
         "- Conecte acessibilidade a SEO: Google penaliza estrutura semântica quebrada — cite impacto em ranking orgânico.\n"
         "- Cite a LBI (Lei 13.146/2015): multas e risco de ação civil pública são argumentos decisivos para aprovação de budget.\n"
-        "- Tom: direto, executivo, orientado a ROI. Sem jargão técnico desnecessário."
+        "- Tom: direto, executivo, orientado a resultado. Sem jargão técnico desnecessário."
     ),
     "corporate": (
         "Você é um Consultor Sênior de Compliance Digital, ESG e Acessibilidade para empresas de médio e grande porte.\n"
@@ -27,17 +32,18 @@ SYSTEM_PROMPT_TEMPLATES = {
     ),
     "saas": (
         "Você é um Growth Product Manager especialista em Acessibilidade e Retenção de Produtos SaaS B2B e B2C.\n"
-        "Sua missão é demonstrar como cada barreira de acessibilidade se traduz em perda de MRR, aumento de churn e bloqueio de expansão de mercado.\n\n"
+        "Sua missão é demonstrar como cada barreira de acessibilidade se traduz em perda de receita recorrente, aumento de churn e bloqueio de expansão de mercado.\n\n"
         "Diretrizes obrigatórias:\n"
-        "- Mapeie o impacto no funil de ativação: usuários que não conseguem completar o onboarding nunca ativam — zero LTV.\n"
-        "- Cite o mercado endereçável perdido: 18,6 milhões de brasileiros com deficiência são usuários potenciais bloqueados.\n"
+        "- Mapeie o impacto no funil de ativação: usuários que não conseguem completar o onboarding nunca ativam.\n"
+        "- Cite o mercado endereçável perdido: 18,6 milhões de brasileiros com deficiência (IBGE) são usuários potenciais bloqueados.\n"
         "- Conecte acessibilidade a enterprise sales: clientes corporativos exigem conformidade WCAG em RFPs e contratos.\n"
         "- Tom: data-driven, orientado a produto e crescimento sustentável."
-    )
+    ),
 }
 
+
 async def generate_image_description(image_url: str) -> str:
-    """Gera descricao alternativa (alt text) para uma imagem via Groq."""
+    """Gera descrição alternativa (alt text) para uma imagem via Groq."""
     if not client:
         return "Configuração de IA ausente (Chave API não encontrada no ambiente)."
 
@@ -45,15 +51,15 @@ async def generate_image_description(image_url: str) -> str:
         # O SDK do Groq é síncrono; rodamos a chamada num executor para não
         # travar o loop de eventos do FastAPI. O próprio Groq busca a imagem
         # pela URL, então não baixamos os bytes aqui.
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
 
         image_prompt = (
-            "Você é um especialista em acessibilidade digital e e-commerce. "
-            "Descreva esta imagem de produto para ser usada como texto alternativo (atributo alt). "
-            "Seja conciso, direto e descreva o objeto, cor, material e características principais. "
+            "Você é um especialista em acessibilidade digital. "
+            "Descreva esta imagem para ser usada como texto alternativo (atributo alt). "
+            "Seja conciso e objetivo: descreva o conteúdo principal, o contexto e "
+            "qualquer texto visível na imagem. "
             "Responda estritamente com a descrição final em português, sem introduções ou frases como 'Esta imagem mostra'."
         )
-
 
         messages = [
             {
@@ -65,11 +71,10 @@ async def generate_image_description(image_url: str) -> str:
             }
         ]
 
-        # Chama o endpoint de chat/completions do Groq (sincrono, rodando no executor)
         response_ai = await loop.run_in_executor(
             None,
             lambda: client.chat.completions.create(
-                model="meta-llama/llama-4-scout-17b-16e-instruct",
+                model=settings.groq_vision_model,
                 messages=messages,
                 temperature=0.0,
             ),
@@ -77,57 +82,61 @@ async def generate_image_description(image_url: str) -> str:
 
         if response_ai.choices and response_ai.choices[0].message.content:
             return response_ai.choices[0].message.content.strip()
-        
+
         return ""
 
-    except Exception as e:
+    except Exception:
+        logger.exception("Falha ao gerar descrição de imagem via Groq (url=%s)", image_url)
         return "Sugestão de descrição indisponível no momento."
 
 
 def _detect_business_segment(url: str, meta_description: str) -> str:
     """
-    Analyzes the URL and Meta Description for keywords to classify the target
-    website as 'ecommerce', 'saas', or 'corporate' (default).
+    Analisa a URL e a meta description em busca de palavras-chave para
+    classificar o site alvo como 'ecommerce', 'saas' ou 'corporate' (padrão).
     """
     analysis_text = f"{url} {meta_description}".lower()
-    # Busca por palavras exatas ou radicais comuns do ecossistema de vendas
+
+    # E-commerce: palavras exatas ou radicais comuns do ecossistema de vendas
     ecommerce_pattern = r"\b(compre?|lojas?|produtos?|ofertas?|descontos?|carrinho|checkout|vendas?|shop(ping)?|cart|store|roupas?|sapatos?|acessórios?|parcelado|moda|femininas?|masculinas?|infantis?)\b"
-    
-    # 2. PADRÃO REGEX PARA SAAS / PLATAFORMAS
-    # Busca por termos que indicam sistemas baseados em assinatura, dashboards ou automações
+
+    # SaaS / plataformas: termos de sistemas por assinatura, dashboards ou automações
     saas_pattern = r"\b(plataformas?|softwares?|sistemas?|apps?|automaç(ão|ões)|ferramentas?|dashboards?|mrr|saas|hub|tools?)\b"
-    
-    # Executa a busca via Regex
+
     if re.search(ecommerce_pattern, analysis_text):
         return "ecommerce"
-        
+
     if re.search(saas_pattern, analysis_text):
         return "saas"
-        
+
     return "corporate"
 
 
-async def generate_executive_report(url: str, context: str, summary_errors: dict, business_segment: str = "corporate", roadmap: list = None) -> str:
+async def generate_executive_report(
+    url: str,
+    context: str,
+    summary_errors: dict,
+    business_segment: str = "corporate",
+    roadmap: list = None,
+) -> str:
     if not client:
         return "Configuração da IA Groq ausente."
 
     roadmap = roadmap or []
 
-    # usa o segmento recebido como parâmetro — removida a chamada duplicada
     system_prompt_base = SYSTEM_PROMPT_TEMPLATES.get(
-        business_segment.lower(),
-        SYSTEM_PROMPT_TEMPLATES["corporate"]
+        business_segment.lower(), SYSTEM_PROMPT_TEMPLATES["corporate"]
     )
 
-    # Nova abordagem: Construindo a Tabela Markdown estruturada para o LLM
+    # Tabela Markdown estruturada como guia de priorização para o LLM
     roadmap_lines = [
         "| Prioridade | Impacto | Categoria de Barreira | Ocorrências | Justificativa de Negócio |",
-        "| :--- | :--- | :--- | :--- | :--- |"
+        "| :--- | :--- | :--- | :--- | :--- |",
     ]
     for item in roadmap:
         line = f"| {item['priority']} | {item['label']} | {item['category']} | {item['count']} | {item['reason']} |"
         roadmap_lines.append(line)
-        
+
     roadmap_str = "\n".join(roadmap_lines)
 
     system_prompt_complete = (
@@ -136,8 +145,8 @@ async def generate_executive_report(url: str, context: str, summary_errors: dict
         f"DADOS DE PRIORIZAÇÃO (Use como guia de análise):\n{roadmap_str}\n\n"
         "IMPORTANTE: Comece DIRETAMENTE pelo tópico '1. Impacto em Conversão e Usuários'. "
         "Não adicione títulos introdutórios, cabeçalhos ou textos antes do primeiro tópico.\n"
-        "IMPORTANTE: Não mencione valores financeiros, estimativas em R$ ou percentuais inventados. " 
-        "Descreva os impactos de forma qualitativa e estratégica, sem fabricar números.\n"            
+        "IMPORTANTE: Não mencione valores financeiros, estimativas em R$ ou percentuais inventados. "
+        "Descreva os impactos de forma qualitativa e estratégica, sem fabricar números.\n"
         "Gere o relatório dividido nestes três tópicos:\n"
         "1. Impacto em Conversão e Usuários\n"
         "2. Impacto em Tráfego e SEO\n"
@@ -153,27 +162,23 @@ async def generate_executive_report(url: str, context: str, summary_errors: dict
     """
 
     try:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
 
         response_ai = await loop.run_in_executor(
             None,
             lambda: client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model=settings.groq_report_model,
                 messages=[
                     {"role": "system", "content": system_prompt_complete},
-                    {"role": "user", "content": user_prompt}
+                    {"role": "user", "content": user_prompt},
                 ],
                 temperature=0.2,
-                max_tokens=1000
-            )
+                max_tokens=1000,
+            ),
         )
 
         return response_ai.choices[0].message.content
 
-    except Exception as e:
-        import traceback
-        print(f"[AI DEBUG] Groq pipeline failure: {e}")
-        print(traceback.format_exc())
-        return "Relatório de impactos de negócio indisponível no momento."    
-
-
+    except Exception:
+        logger.exception("Falha no pipeline Groq do relatório executivo (url=%s)", url)
+        return "Relatório de impactos de negócio indisponível no momento."

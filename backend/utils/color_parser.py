@@ -6,10 +6,7 @@ RGBTuple = tuple[float, float, float]
 
 # Converte string de cor CSS para tupla RGB normalizada (0.0 a 1.0)
 def parse_color(color_str: str) -> Optional[RGBTuple]:
-    match = re.match(
-        r"rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)",
-        color_str.strip()
-    )
+    match = re.match(r"rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)", color_str.strip())
 
     if not match:
         return None

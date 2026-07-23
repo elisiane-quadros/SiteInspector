@@ -5,6 +5,7 @@ Adiciona a raiz do projeto ao sys.path para que os imports
 absolutos (ex: `from backend.scanner.core import ...`)
 funcionem corretamente ao rodar `pytest` de qualquer diretório.
 """
+
 import sys
 from pathlib import Path
 

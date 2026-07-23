@@ -53,8 +53,7 @@ PRIORITY_MAP = {
         "level": "P3",
         "label": "Médio",
         "reason": (
-            "Imagens sem descrição afetam o SEO e a experiência de "
-            "usuários com deficiência visual."
+            "Imagens sem descrição afetam o SEO e a experiência de usuários com deficiência visual."
         ),
     },
     "headings": {
@@ -69,8 +68,7 @@ PRIORITY_MAP = {
         "level": "P3",
         "label": "Médio",
         "reason": (
-            "Ausência de landmarks dificulta a navegação rápida por "
-            "tecnologias assistivas."
+            "Ausência de landmarks dificulta a navegação rápida por tecnologias assistivas."
         ),
     },
 }
@@ -97,11 +95,7 @@ def generate_priority_roadmap(results: dict, contrast_issues: list) -> list[dict
     incluindo apenas categorias com ocorrências reais (count > 0).
     """
     # Computa as contagens de forma limpa
-    counts = {
-        key: len(results.get(key, []))
-        for key in PRIORITY_MAP
-        if key != "contrast"
-    }
+    counts = {key: len(results.get(key, [])) for key in PRIORITY_MAP if key != "contrast"}
     counts["contrast"] = len(contrast_issues)
 
     roadmap = []
@@ -110,15 +104,17 @@ def generate_priority_roadmap(results: dict, contrast_issues: list) -> list[dict
             # Usando .get() para evitar KeyError caso o mapa mude no futuro
             info = PRIORITY_MAP.get(category)
             name = CATEGORY_NAMES.get(category, f"Outros ({category})")
-            
+
             if info:
-                roadmap.append({
-                    "priority": info["level"],
-                    "label": info["label"],
-                    "category": name,
-                    "count": count,
-                    "reason": info["reason"],
-                })
+                roadmap.append(
+                    {
+                        "priority": info["level"],
+                        "label": info["label"],
+                        "category": name,
+                        "count": count,
+                        "reason": info["reason"],
+                    }
+                )
 
     # Ordena o roadmap com base no peso definido em _PRIORITY_ORDER
     roadmap.sort(key=lambda item: _PRIORITY_ORDER.get(item["priority"], 99))
