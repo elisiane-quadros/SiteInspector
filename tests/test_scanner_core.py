@@ -4,22 +4,24 @@ Testes do motor de auditoria (scanner/core.py).
 Valida cada função de verificação individualmente usando HTML
 controlado, sem depender de requisições externas ou Playwright.
 """
+
 import pytest
 from bs4 import BeautifulSoup
+
 from backend.scanner.core import (
+    check_buttons_without_label,
+    check_heading_structure,
     check_images_without_alt,
     check_inputs_without_label,
-    check_heading_structure,
-    check_links_with_vague_text,
-    check_buttons_without_label,
-    check_missing_landmarks,
     check_keyboard_navigation,
+    check_links_with_vague_text,
+    check_missing_landmarks,
 )
-
 
 # =============================================================================
 # check_images_without_alt
 # =============================================================================
+
 
 def test_imagens_com_alt_nao_disparam_erro():
     soup = BeautifulSoup('<img src="foto.jpg" alt="Descrição válida" />', "html.parser")
@@ -56,6 +58,7 @@ def test_multiplas_imagens_sem_alt():
 # check_inputs_without_label
 # =============================================================================
 
+
 def test_input_com_label_nao_dispara_erro():
     html = '<label for="nome">Nome:</label><input id="nome" type="text" />'
     soup = BeautifulSoup(html, "html.parser")
@@ -70,17 +73,13 @@ def test_input_sem_label_dispara_erro():
 
 
 def test_input_com_aria_label_nao_dispara_erro():
-    soup = BeautifulSoup(
-        '<input type="text" aria-label="Buscar" />', "html.parser"
-    )
+    soup = BeautifulSoup('<input type="text" aria-label="Buscar" />', "html.parser")
     issues = check_inputs_without_label(soup)
     assert len(issues) == 0
 
 
 def test_input_hidden_e_ignorado():
-    soup = BeautifulSoup(
-        '<input type="hidden" name="csrf" value="123" />', "html.parser"
-    )
+    soup = BeautifulSoup('<input type="hidden" name="csrf" value="123" />', "html.parser")
     issues = check_inputs_without_label(soup)
     assert len(issues) == 0
 
@@ -92,9 +91,7 @@ def test_textarea_sem_label_dispara_erro():
 
 
 def test_select_sem_label_dispara_erro():
-    soup = BeautifulSoup(
-        '<select name="estado"><option>SP</option></select>', "html.parser"
-    )
+    soup = BeautifulSoup('<select name="estado"><option>SP</option></select>', "html.parser")
     issues = check_inputs_without_label(soup)
     assert len(issues) == 1
 
@@ -102,6 +99,7 @@ def test_select_sem_label_dispara_erro():
 # =============================================================================
 # check_heading_structure
 # =============================================================================
+
 
 def test_hierarquia_correta_nao_dispara_erro():
     html = "<h1>Título</h1><h2>Seção</h2><h3>Subseção</h3>"
@@ -138,6 +136,7 @@ def test_nenhum_h1_dispara_erro():
 # check_links_with_vague_text
 # =============================================================================
 
+
 def test_link_descritivo_nao_dispara_erro():
     soup = BeautifulSoup(
         '<a href="/produtos">Catálogo completo de produtos</a>',
@@ -147,14 +146,21 @@ def test_link_descritivo_nao_dispara_erro():
     assert len(issues) == 0
 
 
-@pytest.mark.parametrize("vague_text", [
-    "clique aqui", "saiba mais", "leia mais", "acesse",
-    "ver mais", "continue lendo", "detalhes", "clique",
-])
+@pytest.mark.parametrize(
+    "vague_text",
+    [
+        "clique aqui",
+        "saiba mais",
+        "leia mais",
+        "acesse",
+        "ver mais",
+        "continue lendo",
+        "detalhes",
+        "clique",
+    ],
+)
 def test_link_com_texto_vago_dispara_erro(vague_text):
-    soup = BeautifulSoup(
-        f'<a href="/page">{vague_text}</a>', "html.parser"
-    )
+    soup = BeautifulSoup(f'<a href="/page">{vague_text}</a>', "html.parser")
     issues = check_links_with_vague_text(soup)
     assert len(issues) == 1
 
@@ -163,10 +169,9 @@ def test_link_com_texto_vago_dispara_erro(vague_text):
 # check_buttons_without_label
 # =============================================================================
 
+
 def test_botao_com_texto_nao_dispara_erro():
-    soup = BeautifulSoup(
-        '<button type="submit">Enviar</button>', "html.parser"
-    )
+    soup = BeautifulSoup('<button type="submit">Enviar</button>', "html.parser")
     issues = check_buttons_without_label(soup)
     assert len(issues) == 0
 
@@ -178,17 +183,13 @@ def test_botao_sem_texto_dispara_erro():
 
 
 def test_botao_com_aria_label_nao_dispara_erro():
-    soup = BeautifulSoup(
-        '<button aria-label="Fechar"></button>', "html.parser"
-    )
+    soup = BeautifulSoup('<button aria-label="Fechar"></button>', "html.parser")
     issues = check_buttons_without_label(soup)
     assert len(issues) == 0
 
 
 def test_div_com_role_button_sem_label_dispara_erro():
-    soup = BeautifulSoup(
-        '<div role="button" onclick="fechar()"></div>', "html.parser"
-    )
+    soup = BeautifulSoup('<div role="button" onclick="fechar()"></div>', "html.parser")
     issues = check_buttons_without_label(soup)
     assert len(issues) == 1
 
@@ -196,6 +197,7 @@ def test_div_com_role_button_sem_label_dispara_erro():
 # =============================================================================
 # check_missing_landmarks
 # =============================================================================
+
 
 def test_todos_landmarks_presentes():
     html = "<main><nav></nav><header></header><footer></footer></main>"
@@ -227,28 +229,23 @@ def test_apenas_main_presente():
 # check_keyboard_navigation
 # =============================================================================
 
+
 def test_tabindex_positivo_dispara_warning():
-    soup = BeautifulSoup(
-        '<div tabindex="5">Elemento</div>', "html.parser"
-    )
+    soup = BeautifulSoup('<div tabindex="5">Elemento</div>', "html.parser")
     issues = check_keyboard_navigation(soup)
     assert len(issues) == 1
     assert issues[0].severity.value == "warning"
 
 
 def test_div_clickavel_sem_tabindex_dispara_erro():
-    soup = BeautifulSoup(
-        '<div onclick="alert()">Clique</div>', "html.parser"
-    )
+    soup = BeautifulSoup('<div onclick="alert()">Clique</div>', "html.parser")
     issues = check_keyboard_navigation(soup)
     assert len(issues) == 1
     assert issues[0].severity.value == "error"
 
 
 def test_link_sem_href_dispara_erro():
-    soup = BeautifulSoup(
-        '<a>Link sem href</a>', "html.parser"
-    )
+    soup = BeautifulSoup("<a>Link sem href</a>", "html.parser")
     issues = check_keyboard_navigation(soup)
     assert len(issues) == 1
 

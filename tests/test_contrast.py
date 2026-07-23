@@ -5,6 +5,7 @@ Testa apenas a função compute_contrast_issues, que é Python puro
 (sem Playwright). A coleta dos dados do navegador é testada
 indiretamente via integração.
 """
+
 from backend.utils.contrast import compute_contrast_issues
 
 

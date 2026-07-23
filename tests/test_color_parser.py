@@ -1,13 +1,15 @@
 """
 Testes do parser de cores CSS (utils/color_parser.py).
 """
-import pytest
-from backend.utils.color_parser import parse_color, is_large_text
 
+import pytest
+
+from backend.utils.color_parser import is_large_text, parse_color
 
 # =============================================================================
 # parse_color
 # =============================================================================
+
 
 def test_rgb_valido():
     result = parse_color("rgb(255, 0, 0)")
@@ -47,6 +49,7 @@ def test_named_color_nao_e_suportado_retorna_none():
 # =============================================================================
 # is_large_text
 # =============================================================================
+
 
 def test_fonte_24px_e_grande():
     assert is_large_text(24.0, "400") is True

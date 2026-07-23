@@ -6,10 +6,10 @@ Importamos a função REAL (`_detect_business_segment`) de
 roda em produção - nunca uma cópia, que poderia ficar desatualizada e dar
 um falso "passou".
 """
+
 import pytest
 
 from backend.utils.ai_assistant import _detect_business_segment
-
 
 # Cada tupla descreve um cenário de teste:
 #   (descrição legível, url, meta_description, segmento_esperado)

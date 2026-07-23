@@ -1,6 +1,7 @@
 from wcag_contrast_ratio import rgb
+
 from backend.models.schemas import ContrastIssue
-from backend.utils.color_parser import parse_color, is_large_text
+from backend.utils.color_parser import is_large_text, parse_color
 
 # Script executado no navegador para coletar texto + cores computadas dos elementos
 # visíveis. Roda dentro da mesma sessão de render usada pela análise estrutural
@@ -52,15 +53,17 @@ def compute_contrast_issues(elements_data: list) -> list[ContrastIssue]:
         threshold = 3.0 if is_large_text(font_size, font_weight) else 4.5
 
         if ratio < threshold:
-            issues.append(ContrastIssue(
-                tag=data["tag"],
-                text=data["text"],
-                color=data["color"],
-                background=data["background"],
-                ratio=round(ratio, 2),
-                threshold=threshold,
-                message=f"Contraste insuficiente: {round(ratio, 2)}:1 (mínimo {threshold}:1)"
-            ))
+            issues.append(
+                ContrastIssue(
+                    tag=data["tag"],
+                    text=data["text"],
+                    color=data["color"],
+                    background=data["background"],
+                    ratio=round(ratio, 2),
+                    threshold=threshold,
+                    message=f"Contraste insuficiente: {round(ratio, 2)}:1 (mínimo {threshold}:1)",
+                )
+            )
 
     return issues
 
