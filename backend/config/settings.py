@@ -19,7 +19,9 @@ class Settings(BaseSettings):
 
     groq_report_model: str = "llama-3.3-70b-versatile"
 
-    groq_vision_model: str = "meta-llama/llama-4-scout-17b-16e-instruct"
+    gemini_api_key: Optional[str] = None
+
+    gemini_vision_model: str = "gemini-2.5-flash"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

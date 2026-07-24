@@ -1,7 +1,9 @@
 import asyncio
+import base64
 import logging
 import re
 
+import httpx
 from groq import Groq
 
 from backend.config.settings import get_settings
@@ -10,6 +12,9 @@ logger = logging.getLogger(__name__)
 
 settings = get_settings()
 client = Groq(api_key=settings.groq_api_key) if settings.groq_api_key else None
+
+GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+
 
 SYSTEM_PROMPT_TEMPLATES = {
     "ecommerce": (
@@ -42,17 +47,63 @@ SYSTEM_PROMPT_TEMPLATES = {
 }
 
 
-async def generate_image_description(image_url: str) -> str:
-    """Gera descrição alternativa (alt text) para uma imagem via Groq."""
-    if not client:
-        return "Configuração de IA ausente (Chave API não encontrada no ambiente)."
+async def _fetch_image_base64(url: str) -> tuple[str, str] | None:
+    """
+    Baixa uma imagem da URL e retorna (content_type, base64) se for válida.
+
+    Validações aplicadas antes de aceitar:
+    - Content-Type precisa começar com ``image/``
+    - Tamanho mínimo de ~1 KB (filtra pixels de rastreamento)
+    - Teto de ~4 MB (evita gastar cota com banners gigantes)
+
+    O Gemini não busca URLs remotas — baixamos os bytes e enviamos como
+    data URI base64. O download também filtra pixels de rastreamento e
+    conteúdo não-imagem antes de gastar cota.
+    """
+    MIN_SIZE = 1024
+    MAX_SIZE = 4 * 1024 * 1024  # 4 MB
 
     try:
-        # O SDK do Groq é síncrono; rodamos a chamada num executor para não
-        # travar o loop de eventos do FastAPI. O próprio Groq busca a imagem
-        # pela URL, então não baixamos os bytes aqui.
-        loop = asyncio.get_running_loop()
+        async with httpx.AsyncClient(timeout=8.0, follow_redirects=True) as http_client:
+            resp = await http_client.get(url)
+            resp.raise_for_status()
 
+        content_type = resp.headers.get("content-type", "")
+
+        if not content_type.startswith("image/"):
+            logger.debug("Content-Type não é imagem (%s): %s", content_type, url)
+            return None
+
+        body = resp.content
+
+        if len(body) < MIN_SIZE:
+            logger.debug("Imagem muito pequena (%d bytes, possível pixel): %s", len(body), url)
+            return None
+
+        if len(body) > MAX_SIZE:
+            logger.debug("Imagem muito grande (%d bytes): %s", len(body), url)
+            return None
+
+        b64 = base64.b64encode(body).decode()
+        return content_type, b64
+
+    except Exception:
+        logger.exception("Falha ao baixar imagem para análise: %s", url)
+        return None
+
+
+async def generate_image_description(image_url: str) -> str:
+    """Gera descrição alternativa (alt text) para uma imagem via Gemini."""
+    if not settings.gemini_api_key:
+        return "Configuração de IA ausente (Chave API não encontrada no ambiente)."
+
+    payload = await _fetch_image_base64(image_url)
+    if payload is None:
+        return "Não foi possível obter a imagem para análise."
+
+    content_type, b64 = payload
+
+    try:
         image_prompt = (
             "Você é um especialista em acessibilidade digital. "
             "Descreva esta imagem para ser usada como texto alternativo (atributo alt). "
@@ -61,32 +112,35 @@ async def generate_image_description(image_url: str) -> str:
             "Responda estritamente com a descrição final em português, sem introduções ou frases como 'Esta imagem mostra'."
         )
 
-        messages = [
-            {
-                "role": "user",
-                "content": [
-                    {"type": "image_url", "image_url": {"url": image_url, "detail": "high"}},
-                    {"type": "text", "text": image_prompt},
-                ],
-            }
-        ]
+        async with httpx.AsyncClient(timeout=30.0) as http_client:
+            resp = await http_client.post(
+                GEMINI_API_URL.format(model=settings.gemini_vision_model),
+                headers={"x-goog-api-key": settings.gemini_api_key},
+                json={
+                    "contents": [
+                        {
+                            "parts": [
+                                {"inline_data": {"mime_type": content_type, "data": b64}},
+                                {"text": image_prompt},
+                            ]
+                        }
+                    ],
+                    "generationConfig": {"temperature": 0.0},
+                },
+            )
+            resp.raise_for_status()
 
-        response_ai = await loop.run_in_executor(
-            None,
-            lambda: client.chat.completions.create(
-                model=settings.groq_vision_model,
-                messages=messages,
-                temperature=0.0,
-            ),
-        )
-
-        if response_ai.choices and response_ai.choices[0].message.content:
-            return response_ai.choices[0].message.content.strip()
+        data = resp.json()
+        candidates = data.get("candidates") or []
+        if candidates:
+            parts = (candidates[0].get("content") or {}).get("parts") or []
+            if parts and parts[0].get("text"):
+                return parts[0]["text"].strip()
 
         return ""
 
     except Exception:
-        logger.exception("Falha ao gerar descrição de imagem via Groq (url=%s)", image_url)
+        logger.exception("Falha ao gerar descrição de imagem via Gemini (url=%s)", image_url)
         return "Sugestão de descrição indisponível no momento."
 
 
@@ -101,7 +155,9 @@ def _detect_business_segment(url: str, meta_description: str) -> str:
     ecommerce_pattern = r"\b(compre?|lojas?|produtos?|ofertas?|descontos?|carrinho|checkout|vendas?|shop(ping)?|cart|store|roupas?|sapatos?|acessórios?|parcelado|moda|femininas?|masculinas?|infantis?)\b"
 
     # SaaS / plataformas: termos de sistemas por assinatura, dashboards ou automações
-    saas_pattern = r"\b(plataformas?|softwares?|sistemas?|apps?|automaç(ão|ões)|ferramentas?|dashboards?|mrr|saas|hub|tools?)\b"
+    saas_pattern = (
+        r"\b(plataformas?|softwares?|sistemas?|apps?|automaç(ão|ões)|ferramentas?|dashboards?|mrr|saas|hub|tools?)\b"
+    )
 
     if re.search(ecommerce_pattern, analysis_text):
         return "ecommerce"
@@ -124,9 +180,7 @@ async def generate_executive_report(
 
     roadmap = roadmap or []
 
-    system_prompt_base = SYSTEM_PROMPT_TEMPLATES.get(
-        business_segment.lower(), SYSTEM_PROMPT_TEMPLATES["corporate"]
-    )
+    system_prompt_base = SYSTEM_PROMPT_TEMPLATES.get(business_segment.lower(), SYSTEM_PROMPT_TEMPLATES["corporate"])
 
     # Tabela Markdown estruturada como guia de priorização para o LLM
     roadmap_lines = [
