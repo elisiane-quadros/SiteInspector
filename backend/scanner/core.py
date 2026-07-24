@@ -1,6 +1,8 @@
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+
 from bs4 import BeautifulSoup
 
-from backend.models.schemas import BaseIssue, Severity
+from backend.models.schemas import BaseIssue, ImageAccessibilityIssue, Severity
 
 # Dicionário de tradução: mapeia dados técnicos para a linguagem do cliente leigo
 FRIENDLY_TEXTS = {
@@ -42,15 +44,35 @@ FRIENDLY_TEXTS = {
 }
 
 
+def _strip_download_param(url: str) -> str:
+    """
+    Remove o parâmetro ``download`` da query string de URLs de imagem.
+
+    CMSs como o Liferay servem documentos com ``?download=true``, que instrui
+    o navegador a baixar o arquivo (Content-Disposition: attachment) em vez de
+    exibi-lo — dentro de <img> funciona, mas ao abrir o link direto força
+    download. Os demais parâmetros (t, version) são preservados.
+    """
+    parts = urlsplit(url)
+    if not parts.query:
+        return url
+    params = [(k, v) for k, v in parse_qsl(parts.query, keep_blank_values=True) if k.lower() != "download"]
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(params), parts.fragment))
+
+
 # WCAG 1.1.1 — Conteúdo não textual
-def check_images_without_alt(soup: BeautifulSoup) -> list[BaseIssue]:
+def check_images_without_alt(soup: BeautifulSoup) -> list[ImageAccessibilityIssue]:
     issues = []
     texts = FRIENDLY_TEXTS["1.1.1"]
 
     for img in soup.find_all("img"):
         if not img.has_attr("alt") or not img["alt"].strip():
+            src = img.get("src") or img.get("data-src") or img.get("data-lazy-src")
+            if src:
+                src = _strip_download_param(src)
+
             issues.append(
-                BaseIssue(
+                ImageAccessibilityIssue(
                     wcag="1.1.1",
                     severity=Severity.ERROR,
                     element="img",
@@ -60,6 +82,7 @@ def check_images_without_alt(soup: BeautifulSoup) -> list[BaseIssue]:
                     friendly_title=texts["title"],
                     friendly_message=texts["message"],
                     how_to_fix=texts["how_to_fix"],
+                    image_url=src,
                 )
             )
 
@@ -82,10 +105,7 @@ def check_inputs_without_label(soup: BeautifulSoup) -> list[BaseIssue]:
         label = soup.find("label", attrs={"for": field_id}) if field_id else None
 
         has_label = (
-            label
-            or field.has_attr("aria-label")
-            or field.has_attr("aria-labelledby")
-            or field.has_attr("title")
+            label or field.has_attr("aria-label") or field.has_attr("aria-labelledby") or field.has_attr("title")
         )
 
         if not has_label:
@@ -205,9 +225,7 @@ def check_buttons_without_label(soup: BeautifulSoup) -> list[BaseIssue]:
     issues = []
     texts = FRIENDLY_TEXTS["4.1.2"]
 
-    clickable = soup.find_all(
-        lambda tag: tag.name == "button" or tag.get("role") == "button" or "onclick" in tag.attrs
-    )
+    clickable = soup.find_all(lambda tag: tag.name == "button" or tag.get("role") == "button" or "onclick" in tag.attrs)
 
     for btn in clickable:
         has_label = (
@@ -249,11 +267,7 @@ def check_keyboard_navigation(soup: BeautifulSoup) -> list[BaseIssue]:
 
     def is_non_semantic_clickable(tag):
         if tag.name in ["div", "span", "li", "td", "section"]:
-            return (
-                tag.has_attr("onclick")
-                or tag.has_attr("onkeydown")
-                or tag.get("role") in ["button", "link"]
-            )
+            return tag.has_attr("onclick") or tag.has_attr("onkeydown") or tag.get("role") in ["button", "link"]
         return False
 
     for tag in soup.find_all(True):

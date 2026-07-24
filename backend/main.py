@@ -8,6 +8,7 @@ import urllib3
 from bs4 import BeautifulSoup
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from playwright.async_api import Error as PlaywrightError
 from playwright.async_api import TimeoutError
 
 from backend.config.settings import get_settings
@@ -44,7 +45,7 @@ settings = get_settings()
 logger = logging.getLogger(__name__)
 
 AI_IMAGE_LIMIT = 10
-AI_IMAGE_CONCURRENCY = 4
+AI_IMAGE_CONCURRENCY = 2
 AI_IMAGE_TIMEOUT = 20
 AI_IMAGE_FALLBACK = (
     "Esta imagem não possui o atributo 'alt'. Adicione uma descrição curta e objetiva "
@@ -92,15 +93,14 @@ async def check_accessibility(data: AnalysisRequest):
             )
 
             try:
-                await page.wait_for_load_state(
-                    "networkidle", timeout=settings.network_timeout * 1000
-                )
+                await page.wait_for_load_state("networkidle", timeout=settings.network_timeout * 1000)
             except TimeoutError:
                 pass
 
             html = await page.content()
             soup = BeautifulSoup(html, "lxml")
 
+            # image_url já nasce populado dentro de ImageAccessibilityIssue
             base_images = check_images_without_alt(soup)
 
             results = {
@@ -116,20 +116,12 @@ async def check_accessibility(data: AnalysisRequest):
             ai_targets: list[int] = []
 
             for issue in base_images:
-                image_url = None
-                temp_soup = BeautifulSoup(issue.html, "html.parser")
-                img_tag = temp_soup.find("img")
-                if img_tag and img_tag.get("src"):
-                    image_url = img_tag.get("src").strip()
+                image_url = issue.image_url
 
                 suggestion = None
                 if image_url:
                     if not image_url.startswith("http"):
-                        base_url = (
-                            str(data.url)
-                            if str(data.url).startswith("http")
-                            else "https://example.com"
-                        )
+                        base_url = str(data.url) if str(data.url).startswith("http") else "https://example.com"
                         image_url = urljoin(base_url, image_url)
                     if image_url.lower().split("?")[0].endswith(".svg"):
                         suggestion = "Ícones decorativos ou formatos vetoriais não requerem análise assistida por IA."
@@ -224,6 +216,13 @@ async def check_accessibility(data: AnalysisRequest):
 
     except HTTPException:
         raise
+
+    except (PlaywrightError, TimeoutError):
+        logger.warning("Não foi possível carregar a URL alvo: %s", data.url)
+        raise HTTPException(
+            status_code=422,
+            detail="Não foi possível acessar o site informado. Verifique se a URL está correta e se o site está no ar.",
+        )
 
     except Exception:
         logger.exception("Falha na inspeção de %s", data.url)
