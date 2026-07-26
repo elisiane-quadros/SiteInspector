@@ -178,8 +178,6 @@ async def check_accessibility(data: AnalysisRequest):
             contrast_issues = await check_text_contrast(page)
             results["contrast"] = contrast_issues
 
-            total_issues = sum(len(v) for v in results.values())
-
             priority_roadmap = generate_priority_roadmap(results, contrast_issues)
             results["priority_roadmap"] = priority_roadmap
 
@@ -196,7 +194,9 @@ async def check_accessibility(data: AnalysisRequest):
                 "botoes_inacessiveis": len(results.get("buttons", [])),
                 "landmarks_ausentes": len(results.get("landmarks", [])),
                 "navegacao_teclado": len(results.get("focus", [])),
+                "problemas_contraste": len(contrast_issues),
             }
+            total_issues = sum(summary_errors.values())
 
             ai_report = await generate_executive_report(
                 str(data.url), meta_description, summary_errors, detected_segment, priority_roadmap
@@ -209,6 +209,7 @@ async def check_accessibility(data: AnalysisRequest):
                 contrast_issues=contrast_issues,
                 image_issues=image_issues,
                 total_issues=total_issues,
+                summary=summary_errors,
                 business_segment=detected_segment,
                 executive_analysis=ai_report,
                 priority_roadmap=priority_roadmap,

@@ -24,28 +24,33 @@ interface ExecutiveReportProps {
       reason: string;
     }>;
   };
+  summary: Record<string, number>;
+  totalIssues: number;   
   url: string;
   businessSegment: string;
   executiveAnalysis: string;
 }
 
+const VOLUMETRY_LABELS: Record<string, string> = {
+  imagens_sem_alt: "Imagens sem Descrição (alt)",
+  campos_sem_rotulo: "Campos de Formulário sem Rótulo",
+  hierarquia_titulos: "Hierarquia de Títulos",
+  links_vagos: "Links com Texto Vago",
+  botoes_inacessiveis: "Botões sem Rótulo Acessível",
+  landmarks_ausentes: "Landmarks Semânticos Ausentes",
+  navegacao_teclado: "Navegação por Teclado / Foco",
+  problemas_contraste: "Problemas de Contraste",
+};
+
 export const ExecutiveReportPDF: React.FC<ExecutiveReportProps> = ({
   result,
+  summary = {},
+  totalIssues = 0,
   url, 
   businessSegment = "Não Informado", 
   executiveAnalysis = "",
 }) => {
 
-  const totalImages = result.images?.length || 0;
-  const totalForms = result.forms?.length || 0;
-  const totalHeadings = result.headings?.length || 0;
-  const totalLinks = result.links?.length || 0;
-  const totalButtons = result.buttons?.length || 0;
-  const totalLandmarks = result.landmarks?.length || 0;
-  const totalFocus    = result.focus?.length    || 0;
-  const totalContrast = result.contrast?.length || 0;
-  
-  const totalGeral = totalImages + totalForms + totalHeadings + totalLinks + totalButtons + totalLandmarks + totalFocus + totalContrast;
 
   // Função auxiliar para definir o nível de risco institucional
   const getRiskLevel = (total: number) => {
@@ -54,7 +59,7 @@ export const ExecutiveReportPDF: React.FC<ExecutiveReportProps> = ({
     return { label: 'BAIXO', color: '#15803d' };
   };
 
-  const risk = getRiskLevel(totalGeral);
+  const risk = getRiskLevel(totalIssues);
 
   const formattedDate = new Date().toLocaleString('pt-PT', {
     day: '2-digit',
@@ -125,49 +130,16 @@ export const ExecutiveReportPDF: React.FC<ExecutiveReportProps> = ({
             <Text style={[styles.tableCellHeader, { flex: 1, textAlign: 'center' }]}>Ocorrências</Text>
           </View>
 
-          <View style={styles.tableRow}>
-            <Text style={[styles.tableCell, { flex: 3 }]}>Imagens sem Descrição (Acessibilidade Visual e SEO)</Text>
-            <Text style={[styles.tableCell, { flex: 1, textAlign: 'center', fontFamily: 'Helvetica-Bold' }]}>{totalImages}</Text>
-          </View>
-          
-          <View style={[styles.tableRow, styles.zebraBg]}>
-            <Text style={[styles.tableCell, { flex: 3 }]}>Campos de Formulário sem Rótulo (Barreira de Entrada e Conversão)</Text>
-            <Text style={[styles.tableCell, { flex: 1, textAlign: 'center', fontFamily: 'Helvetica-Bold' }]}>{totalForms}</Text>
-          </View>
-
-          <View style={styles.tableRow}>
-            <Text style={[styles.tableCell, { flex: 3 }]}>Quebras na Hierarquia Semântica (Estrutura de Títulos)</Text>
-            <Text style={[styles.tableCell, { flex: 1, textAlign: 'center', fontFamily: 'Helvetica-Bold' }]}>{totalHeadings}</Text>
-          </View>
-
-          <View style={[styles.tableRow, styles.zebraBg]}>
-            <Text style={[styles.tableCell, { flex: 3 }]}>Links Ambíguos ou Vagos (Prejudica a Navegação Dinâmica)</Text>
-            <Text style={[styles.tableCell, { flex: 1, textAlign: 'center', fontFamily: 'Helvetica-Bold' }]}>{totalLinks}</Text>
-          </View>
-
-          <View style={styles.tableRow}>
-            <Text style={[styles.tableCell, { flex: 3 }]}>Botões Inacessíveis (Loops de Navegação por Teclado)</Text>
-            <Text style={[styles.tableCell, { flex: 1, textAlign: 'center', fontFamily: 'Helvetica-Bold' }]}>{totalButtons}</Text>
-          </View>
-
-          <View style={[styles.tableRow, styles.zebraBg]}>
-            <Text style={[styles.tableCell, { flex: 3 }]}>Problemas de Navegação e Foco (Barreiras de Interação por Teclado)</Text>
-            <Text style={[styles.tableCell, { flex: 1, textAlign: 'center', fontFamily: 'Helvetica-Bold' }]}>{totalFocus}</Text>
-          </View>
-
-          <View style={styles.tableRow}>
-            <Text style={[styles.tableCell, { flex: 3 }]}>Landmarks Estruturais Ausentes (Falha de Semântica Core)</Text>
-            <Text style={[styles.tableCell, { flex: 1, textAlign: 'center', fontFamily: 'Helvetica-Bold' }]}>{totalLandmarks}</Text>
-          </View>
-
-          <View style={[styles.tableRow, styles.zebraBg]}>
-            <Text style={[styles.tableCell, { flex: 3 }]}>Problemas de Contraste de Cores (Legibilidade e Fadiga Visual)</Text>
-            <Text style={[styles.tableCell, { flex: 1, textAlign: 'center', fontFamily: 'Helvetica-Bold' }]}>{totalContrast}</Text>
-          </View>
+          {Object.entries(summary).map(([key, total], index) => (
+            <View style={index % 2 === 1 ? [styles.tableRow, styles.zebraBg] : styles.tableRow} key={key}>
+              <Text style={[styles.tableCell, { flex: 3 }]}>{VOLUMETRY_LABELS[key] ?? key}</Text>
+              <Text style={[styles.tableCell, { flex: 1, textAlign: 'center', fontFamily: 'Helvetica-Bold' }]}>{total}</Text>
+            </View>
+          ))}
 
           <View style={styles.tableTotalRow}>
             <Text style={[styles.tableCellTotal, { flex: 3 }]}>Total de Inconformidades Ativas</Text>
-            <Text style={[styles.tableCellTotal, { flex: 1, textAlign: 'center', color: risk.color }]}>{totalGeral}</Text>
+            <Text style={[styles.tableCellTotal, { flex: 1, textAlign: 'center', color: risk.color }]}>{totalIssues}</Text>
           </View>
         </View>
 
@@ -277,7 +249,6 @@ export const ExecutiveReportPDF: React.FC<ExecutiveReportProps> = ({
   );
 };
 
-// Estilos Premium e Corporativos - Sem excessos, focados em espaço e harmonia
 const styles = StyleSheet.create({
   page: {
     padding: 40,

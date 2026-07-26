@@ -67,6 +67,7 @@ class AnalysisResult(BaseModel):
     contrast_issues: List[ContrastIssue] = []
     image_issues: List[ImageAccessibilityIssue] = []
     total_issues: int = 0
+    summary: Dict[str, int] = {}
     business_segment: str
     executive_analysis: str
     priority_roadmap: List[Dict[str, Any]] = []

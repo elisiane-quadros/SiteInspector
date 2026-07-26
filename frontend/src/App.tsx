@@ -69,6 +69,8 @@ function App() {
       const finalResults = {
         ...data.results,
         url: data.url || normalizedUrl,
+        summary: data.summary,
+        total_issues: data.total_issues,
         business_segment: data.business_segment,
         executive_analysis: data.executive_analysis,
         priority_roadmap: data.priority_roadmap
@@ -223,6 +225,8 @@ function App() {
                         document={
                           <ExecutiveReportPDF
                             result={result}
+                            summary={result?.summary || {}}
+                            totalIssues={result?.total_issues || 0}
                             url={currentUrl || result.url || "URL não informada"}
                             businessSegment={result?.business_segment || "Geral"}
                             executiveAnalysis={result?.executive_analysis || "Análise estratégica em processamento..."}

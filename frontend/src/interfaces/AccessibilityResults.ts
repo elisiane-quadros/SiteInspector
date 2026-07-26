@@ -18,6 +18,8 @@ export interface AccessibilityResults {
   buttons: ResultItem[];
   landmarks: Array<string | ResultItem>;
   url: string;
+  summary?: Record<string, number>;
+  total_issues?: number;
   business_segment: string;
   executive_analysis: string;
   priority_roadmap: PriorityItem[];
