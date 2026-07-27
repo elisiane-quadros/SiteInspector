@@ -200,14 +200,25 @@ export const ExecutiveReportPDF: React.FC<ExecutiveReportProps> = ({
           )}
         </View>
 
-        {/* Seção: Roadmap de Otimização Sugerido */}
+        <View style={styles.footer} fixed>
+          <Text>Documento Confidencial - Gerado automaticamente via A11y_Inspector.</Text>
+          <Text render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
+        </View>
+      </Page>
+      {/* Página 3: Roadmap de Otimização Sugerido */}
+      <Page size="A4" style={styles.page}>
+        <View style={styles.headerContainer}>
+          <Text style={styles.appTitle}>A11y_Inspector</Text>
+          <Text style={styles.docType}>Roadmap de Otimização Sugerido</Text>
+        </View>
+
         {result.priority_roadmap && result.priority_roadmap.length > 0 && (
-          <View style={styles.roadmapContainer} wrap={false}>
-            <Text style={styles.sectionTitle}>Roadmap de Otimização Sugerido</Text>
+          
+          <View wrap={false}>
             <Text style={styles.roadmapSubtitle}>
               Ordem recomendada de execução para obter o máximo ganho em conversão de utilizadores e redução imediata de exposição legal (LBI).
             </Text>
-
+            
             {result.priority_roadmap.map((item, index) => {
               const colors = getPriorityColor(item.priority);
 
