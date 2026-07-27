@@ -21,7 +21,7 @@ class Settings(BaseSettings):
 
     gemini_api_key: Optional[str] = None
 
-    gemini_vision_model: str = "gemini-2.5-flash"
+    gemini_vision_model: str = "gemini-2.5-flash-lite"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
