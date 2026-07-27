@@ -17,5 +17,5 @@ COPY . .
 EXPOSE 8000
 
 # Inicia o servidor com uvicorn
-# Usa 0.0.0.0 para aceitar conexões externas (necessário no Railway)
+# Usa 0.0.0.0 para aceitar conexões externas (necessário para o Render)
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
